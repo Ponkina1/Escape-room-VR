@@ -3,12 +3,26 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My first three.js app with modules</title>
+    <title>Escape Room VR</title>
     <style>
+      #timeDisplay {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: #ffffff;
+        padding: 5px;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
       body { margin: 0; overflow: hidden; }
     </style>
   </head>
   <body>
+    <!-- Contenedor donde se mostrará el tiempo -->
+    <div id="timeDisplay">Time: 0.00</div>
+    <div id="container"></div>
+
     <script type="importmap">
       {
         "imports": {
@@ -17,6 +31,7 @@
         }
       }
     </script>
+
     <script type="module" src="./main.js"></script>
   </body>
 </html>
