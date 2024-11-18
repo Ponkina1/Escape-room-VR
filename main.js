@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Octree } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js";
 import { Capsule } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js";
+import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
 
 const clock = new THREE.Clock(); // objeto q lleva la cuenta del tiempo transcurrido
 
@@ -21,6 +22,14 @@ camera.position.set(0, 2.5, 5);
 
 // Luces
 ///// ajustar luces segun quede mejor ////////
+// Añadir luz a la escena
+const ambientLight = new THREE.AmbientLight(0x404040, 1); // Luz ambiental suave
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Luz direccional
+directionalLight.position.set(5, 5, 5); // Posición de la luz
+scene.add(directionalLight);
+
 
 // Ajustes para q se vea fino XD
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -102,7 +111,7 @@ function createCube(width, height, depth, color, position) {
 function playerCollisions() {
   const result = worldOctree.capsuleIntersect(playerCollider);
 
-  playerOnFloor = true;
+  playerOnFloor = false;
 
   if (result) {
     playerOnFloor = result.normal.y > 0;
@@ -185,67 +194,18 @@ function controls(deltaTime) {
   }
 }
 /////////////////////////////////
+// Cargar el modelo FBX
+const loader = new FBXLoader();
+loader.load('Objs/EscenarioBase.fbx', (object) => {
+    // Añadir el modelo cargado a la escena
+    scene.add(object);
+    // Posicionar el objeto en la escena si es necesario
+    object.position.set(0, 0, 0);
+    // Escalar si es necesario
+    object.scale.set(1, 1, 1);
 
-// Crear paredes (usando cubos)
-const wallThickness = 0.1; // Grosor de las paredes
-
-// Pared frontal (al frente de la cámara)
-const frontWall = createCube(10, 5, wallThickness, 0x888888, {
-  x: 0,
-  y: 2.5,
-  z: -5,
 });
-scene.add(frontWall);
-
-// Pared trasera
-const backWall = createCube(10, 5, wallThickness, 0x888888, {
-  x: 0,
-  y: 2.5,
-  z: 5,
-});
-scene.add(backWall);
-
-// Pared izquierda
-const leftWall = createCube(wallThickness, 5, 10, 0x888888, {
-  x: -5,
-  y: 2.5,
-  z: 0,
-});
-scene.add(leftWall);
-
-// Pared derecha
-const rightWall = createCube(wallThickness, 5, 10, 0x888888, {
-  x: 5,
-  y: 2.5,
-  z: 0,
-});
-scene.add(rightWall);
-
-// Piso
-// Piso (cubito sólido)
-const floor = createCube(10, wallThickness, 10, 0x666666, { x: 0, y: 0, z: 0 });
-scene.add(floor);
-worldOctree.add(floor);  // Añadir el piso al Octree para las colisiones
-
-
-// Techo
-const ceiling = createCube(10, wallThickness, 10, 0x666666, {
-  x: 0,
-  y: 5,
-  z: 0,
-});
-scene.add(ceiling);
-
-// Crear puerta (un cubo más pequeño recortado de la pared)
-const doorWidth = 2;
-const doorHeight = 3;
-const doorThickness = 0.1;
-const door = createCube(doorWidth, doorHeight, doorThickness, 0x0a7f00, {
-  x: 0,
-  y: 1.5,
-  z: -5 + wallThickness / 2,
-});
-scene.add(door);
+////////////////////////////////
 
 // Función de animación
 function animate() {
