@@ -107,6 +107,69 @@ function createCube(width, height, depth, color, position) {
   return cube;
 }
 
+// función de colisiones con objetos esféricos
+function playerSphereCollision(sphere) {
+  const center = vector1.addVectors(playerCollider.start, playerCollider.end).multiplyScalar(0.5);
+  const sphere_center = sphere.collider.center;
+  const r = playerCollider.radius + sphere.collider.radius;
+  const r2 = r * r;
+
+  // Aproximación: jugador como 3 esferas
+  for (const point of [playerCollider.start, playerCollider.end, center]) {
+    const d2 = point.distanceToSquared(sphere_center);
+
+    if (d2 < r2) {
+      const normal = vector1.subVectors(point, sphere_center).normalize();
+      const v1 = vector2.copy(normal).multiplyScalar(normal.dot(playerVelocity));
+      const v2 = vector3.copy(normal).multiplyScalar(normal.dot(sphere.velocity));
+
+      playerVelocity.add(v2).sub(v1);
+      sphere.velocity.add(v1).sub(v2);
+
+      const d = (r - Math.sqrt(d2)) / 2;
+      sphere_center.addScaledVector(normal, -d);
+    }
+  }
+}
+
+const bookLoader = new FBXLoader();
+bookLoader.load('Objs/librito.fbx', (object) => {
+    // Añadir el "librito" cargado a la escena
+    scene.add(object);
+    // Posicionar el objeto en la escena
+    object.position.set(5, 1, 0); // Cambia la posición según sea necesario
+    // Escalar si es necesario
+    object.scale.set(0.5, 0.5, 0.5); // Ajusta la escala
+
+    // Crear un collider para el librito (suponiendo que sea un cubo)
+    const bookCollider = new THREE.Box3().setFromObject(object); // Collider AABB
+    bookCollider.object = object; // Referencia al objeto para moverlo después
+});
+
+function playerBookCollision(bookCollider) {
+  // Obtén el centro de la cápsula del jugador
+  const playerCenter = vector1.addVectors(playerCollider.start, playerCollider.end).multiplyScalar(0.5);
+  
+  // Verifica si la cápsula del jugador colisiona con el "librito" (caja)
+  if (bookCollider.intersectsBox(new THREE.Box3().setFromObject(playerCollider))) {
+    const normal = new THREE.Vector3();
+    
+    // Aquí podrías manejar la lógica de cómo reacciona el jugador ante la colisión
+    // Por ejemplo, rebotando o deteniendo el movimiento en una dirección:
+    
+    // 1. Puedes aplicar una simple reacción de rebote si es necesario
+    playerVelocity.addScaledVector(normal, -playerVelocity.dot(normal));
+    
+    // 2. O mover al jugador fuera de la caja (lo que podría ser más adecuado para la mayoría de los juegos de física).
+    playerCollider.translate(normal.multiplyScalar(0.1)); // Empuja al jugador fuera del objeto
+
+    // De aquí puedes añadir más efectos, como sonido o efectos visuales
+  }
+}
+
+
+
+
 // funcion colisiones del jugador
 function playerCollisions() {
   const result = worldOctree.capsuleIntersect(playerCollider);
@@ -193,7 +256,6 @@ function controls(deltaTime) {
     }
   }
 }
-/////////////////////////////////
 // Cargar el modelo FBX
 const loader = new FBXLoader();
 loader.load('Objs/EscenarioBase.fbx', (object) => {
@@ -204,8 +266,9 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
     // Escalar si es necesario
     object.scale.set(1, 1, 1);
 
+    worldOctree.fromGraphNode(scene);
+
 });
-////////////////////////////////
 
 // Función de animación
 function animate() {
