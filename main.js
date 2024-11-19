@@ -146,29 +146,83 @@ function updatePlayer(deltaTime) {
 
 // Función de teletransportación de VR
 function teleportInVR() {
-  if ((controller1.userData.isSelecting || controller2.userData.isSelecting)) {
-    const controller = controller1.userData.isSelecting ? controller1 : controller2;
+    if ((controller1.userData.isSelecting || controller2.userData.isSelecting)) {
+      const controller = controller1.userData.isSelecting ? controller1 : controller2;
+      
+      // Configurar matriz temporal del controlador
+      tempMatrix.identity().extractRotation(controller.matrixWorld);
+  
+      // Configurar raycaster desde la posición del controlador
+      raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+      raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  
+      // Buscar intersecciones con el suelo u objetos en la escena
+      const intersects = raycaster.intersectObjects(scene.children, true);
+  
+      if (intersects.length > 0) {
+        // Nueva verificación de colisiones para teletransportación
+        const teleportPoint = intersects[0].point;
+        const tempPlayerCollider = new Capsule(
+          new THREE.Vector3(teleportPoint.x, teleportPoint.y + 0.35, teleportPoint.z),
+          new THREE.Vector3(teleportPoint.x, teleportPoint.y + 1.6, teleportPoint.z),
+          0.35
+        );
+  
+        // Verificar si el punto de teletransportación es válido (sin colisiones)
+        const collisionResult = worldOctree.capsuleIntersect(tempPlayerCollider);
+        
+        if (!collisionResult) {
+          INTERSECTION = teleportPoint;
+          teleportMarker.position.copy(INTERSECTION);
+          teleportMarker.visible = true;
+        } else {
+          INTERSECTION = undefined;
+          teleportMarker.visible = false;
+        }
+      } else {
+        INTERSECTION = undefined;
+        teleportMarker.visible = false;
+      }
+    }
+  }
+  
+
+
+  /////////////////////////////////////////////////////////
+  function onSelectEnd() {
+    this.userData.isSelecting = false;
     
-    // Configurar matriz temporal del controlador
-    tempMatrix.identity().extractRotation(controller.matrixWorld);
-
-    // Configurar raycaster desde la posición del controlador
-    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-    // Buscar intersecciones con el suelo u objetos en la escena
-    const intersects = raycaster.intersectObjects(scene.children, true);
-
-    if (intersects.length > 0) {
-      INTERSECTION = intersects[0].point;
-      teleportMarker.position.copy(INTERSECTION);
-      teleportMarker.visible = true;
-    } else {
-      INTERSECTION = undefined;
+    // Realizar teletransportación si hay una intersección válida
+    if (INTERSECTION) {
+      // Crear una nueva posición de jugador con el punto de teletransportación
+      playerCollider.start.copy(new THREE.Vector3(
+        INTERSECTION.x, 
+        INTERSECTION.y + 0.35, 
+        INTERSECTION.z
+      ));
+      playerCollider.end.copy(new THREE.Vector3(
+        INTERSECTION.x, 
+        INTERSECTION.y + 1.6, 
+        INTERSECTION.z
+      ));
+  
+      // Actualizar posición de la cámara
+      camera.position.copy(playerCollider.end);
+      
+      // Crear transformación de teleportación
+      const offsetPosition = { x: -INTERSECTION.x, y: -INTERSECTION.y, z: -INTERSECTION.z, w: 1 };
+      const offsetRotation = new THREE.Quaternion();
+      const transform = new XRRigidTransform(offsetPosition, offsetRotation);
+      
+      // Obtener espacio de referencia desplazado
+      const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace(transform);
+      renderer.xr.setReferenceSpace(teleportSpaceOffset);
+      
+      // Ocultar marcador
       teleportMarker.visible = false;
     }
   }
-}
+  ////////////////////////////////////////////////////////
 
 // Redimensionar ventana
 function onWindowResize() {
@@ -182,7 +236,7 @@ const loader = new FBXLoader();
 loader.load('Objs/EscenarioBase.fbx', (object) => {
   scene.add(object);
   object.position.set(0, 0, 0);
-  object.scale.set(0.2, 0.2, 0.2);
+  object.scale.set(0.4, 0.4, 0.4);
   worldOctree.fromGraphNode(scene);
 });
 
