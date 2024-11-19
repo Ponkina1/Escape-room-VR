@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { VRButton } from 'https://unpkg.com/three@0.152.0/examples/jsm/webxr/VRButton.js';
 import { Octree } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js";
+import { Capsule } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js";
 import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
 
 const clock = new THREE.Clock();
@@ -32,7 +33,7 @@ scene.add(directionalLight);
 const GRAVITY = 30;
 const STEPS_PER_FRAME = 5;
 const worldOctree = new Octree();
-const playerCollider = new THREE.Capsule(
+const playerCollider = new Capsule(
   new THREE.Vector3(0, 0.35, 0),
   new THREE.Vector3(0, 1, 0),
   0.35
@@ -41,6 +42,7 @@ const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
+let gamepad = null; // Guardar la referencia del gamepad
 
 // Event Listeners
 document.addEventListener("keydown", (event) => {
@@ -82,7 +84,7 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Controles del jugador (teclas y controlador)
+// Controles del jugador (teclas y gamepad)
 function controls(deltaTime) {
   const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
   
@@ -91,33 +93,25 @@ function controls(deltaTime) {
     playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
   }
 
-  // Movimiento con controlador Bluetooth usando la API de Gamepad
-  const gamepads = navigator.getGamepads();
-  const gamepad = gamepads[0]; // Usamos el primer gamepad (en caso de tener múltiples)
-
+  // Movimiento con Gamepad (mando Bluetooth)
   if (gamepad) {
-    const thumbstickY = gamepad.axes[1]; // El eje Y controla el movimiento hacia adelante/atrás
-    if (Math.abs(thumbstickY) > 0.1) {
-      playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * thumbstickY));
+    // Acceder a los valores de los ejes del gamepad
+    const axes = gamepad.axes;
+
+    // Mover hacia adelante/atrás con el eje Y del joystick (usualmente el segundo eje)
+    if (Math.abs(axes[1]) > 0.1) {
+      playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * axes[1]));
     }
   }
 
   if (playerOnFloor && keyStates["Space"]) playerVelocity.y = 15;
 }
 
-// Obtener vector de dirección
+// Obtener vector de dirección (mover hacia adelante)
 function getForwardVector() {
   camera.getWorldDirection(playerDirection);
   playerDirection.y = 0;
   playerDirection.normalize();
-  return playerDirection;
-}
-
-function getSideVector() {
-  camera.getWorldDirection(playerDirection);
-  playerDirection.y = 0;
-  playerDirection.normalize();
-  playerDirection.cross(camera.up);
   return playerDirection;
 }
 
@@ -143,9 +137,21 @@ loader.load('Objs/librito.fbx', (object) => {
   object.scale.set(0.2, 0.2, 0.2);
 });
 
+// Detectar y asignar el gamepad
+function detectGamepad() {
+  const gamepads = navigator.getGamepads();
+  for (let i = 0; i < gamepads.length; i++) {
+    if (gamepads[i]) {
+      gamepad = gamepads[i];
+      break;
+    }
+  }
+}
+
 // Animación
 function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
+  detectGamepad(); // Detecta el gamepad en cada frame
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     controls(deltaTime);
     updatePlayer(deltaTime);
