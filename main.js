@@ -44,6 +44,9 @@ const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
 
+// Estado VR
+let isInVR = false;
+
 // Event Listeners
 document.addEventListener("keydown", (event) => {
   keyStates[event.code] = true;
@@ -84,23 +87,13 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Controles del jugador con el mouse virtual (joystick en modo @D)
-let lastMouseX = 0, lastMouseY = 0;
+// Event Listener para el botón VR (entrar/salir del modo VR)
+renderer.xr.getSession().addEventListener('end', () => {
+  isInVR = false;  // Si se sale del modo VR
+});
 
-// Detectar movimiento del ratón y mover la cámara
-window.addEventListener('mousemove', (event) => {
-  const mouseDeltaX = event.clientX - lastMouseX;
-  const mouseDeltaY = event.clientY - lastMouseY;
-
-  // Usamos las diferencias de movimiento para ajustar la rotación de la cámara
-  const rotationSpeed = 0.002;
-
-  camera.rotation.y -= mouseDeltaX * rotationSpeed;  // Rotación horizontal
-  camera.rotation.x -= mouseDeltaY * rotationSpeed;  // Rotación vertical
-  camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));  // Limitar rotación vertical
-
-  lastMouseX = event.clientX;
-  lastMouseY = event.clientY;
+renderer.xr.getSession().addEventListener('start', () => {
+  isInVR = true;   // Si se entra al modo VR
 });
 
 // Redimensionar ventana
@@ -131,6 +124,14 @@ function animate() {
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     updatePlayer(deltaTime);
   }
+
+  // Si estamos en VR, usamos los controles VR
+  if (isInVR) {
+    // La rotación de la cámara la maneja el sistema VR, no se mueve por el ratón.
+    // Aquí solo se actualizará la posición de la cámara sin rotarla.
+    // Todo el movimiento de la cámara es manejado por el giroscopio y el control VR.
+  }
+
   renderer.render(scene, camera);
 }
 
