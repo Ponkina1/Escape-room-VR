@@ -320,6 +320,13 @@ loader.load('Objs/librito.fbx', (object) => {
     object.scale.set(0.6, 0.6, 0.6);
     object.name = 'librito'; // Añadir nombre para identificación
     librito = object;
+
+    // Cambiar el color del material a verde
+    object.traverse((child) => {
+        if (child.isMesh) {
+            child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        }
+    });
 });
 
 // Inicializar controladores VR
