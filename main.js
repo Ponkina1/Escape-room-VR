@@ -84,32 +84,41 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Controles del jugador (teclas y gamepad)
+// Controles del jugador con joystick
 function controls(deltaTime) {
   const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
   
-  // Movimiento con teclas (tecla "C" para avanzar)
-  if (keyStates["KeyC"]) {
-    playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
-  }
-
-  // Movimiento con Gamepad (mando Bluetooth)
+  // Movimiento con joystick
   if (gamepad) {
-    // Acceder a los valores de los ejes del gamepad
     const axes = gamepad.axes;
 
-    // Mover hacia adelante/atrás con el eje Y del joystick (usualmente el segundo eje)
+    // Movimiento hacia adelante/atrás con el eje Y del joystick (usualmente el segundo eje)
     if (Math.abs(axes[1]) > 0.1) {
       playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * axes[1]));
     }
+
+    // Movimiento hacia los lados con el eje X del joystick (usualmente el primer eje)
+    if (Math.abs(axes[0]) > 0.1) {
+      playerVelocity.add(getSideVector().multiplyScalar(speedDelta * axes[0]));
+    }
   }
 
+  // Salto con espacio
   if (playerOnFloor && keyStates["Space"]) playerVelocity.y = 15;
 }
 
-// Obtener vector de dirección (mover hacia adelante)
+// Obtener el vector de dirección (mover hacia adelante)
 function getForwardVector() {
   camera.getWorldDirection(playerDirection);
+  playerDirection.y = 0;
+  playerDirection.normalize();
+  return playerDirection;
+}
+
+// Obtener el vector de dirección lateral (mover a los lados)
+function getSideVector() {
+  camera.getWorldDirection(playerDirection);
+  playerDirection.cross(camera.up); // Usar el "up" de la cámara para calcular el lado
   playerDirection.y = 0;
   playerDirection.normalize();
   return playerDirection;
