@@ -317,7 +317,7 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 loader.load('Objs/librito.fbx', (object) => {
     scene.add(object);
     object.position.set(0, 4, 0);
-    object.scale.set(0.4, 0.4, 0.4);
+    object.scale.set(0.6, 0.6, 0.6);
     object.name = 'librito'; // Añadir nombre para identificación
     librito = object;
 });
