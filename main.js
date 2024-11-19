@@ -253,6 +253,12 @@ loader.load('Objs/librito.fbx', (object) => {
   });
 });
 
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
+const cube = new THREE.Mesh(geometry, material);
+cube.position.set(0, 1, -3);
+scene.add(cube);
+
 
 camera.lookAt(0, 1, -3); // Hacer que la cámara mire hacia donde está el libro
 // Inicializar controladores VR
