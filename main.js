@@ -141,6 +141,27 @@ loader.load('Objs/librito.fbx', (object) => {
   object.scale.set(0.2, 0.2, 0.2);
 });
 
+
+/////////////////////////////////////////////////
+/ Función para mover al jugador hacia la dirección de la cámara
+function movePlayerForward() {
+  const direction = new THREE.Vector3();  // Vector que indica la dirección
+  camera.getWorldDirection(direction);  // Obtiene la dirección en la que está mirando la cámara
+  direction.y = 0; // Evitar que el jugador suba o baje
+  direction.normalize();  // Normaliza el vector para que no se mueva más rápido
+
+  // Mover al jugador hacia la dirección de la cámara
+  playerVelocity.addScaledVector(direction, 0.1);  // Ajusta la velocidad aquí
+}
+
+// Event listener para detectar cuando se presiona un botón específico (e.g., tecla "W")
+document.addEventListener("keydown", (event) => {
+  if (event.code === "KeyW") {  // Si presionamos la tecla W
+    movePlayerForward();  // Mover al jugador hacia la dirección de la cámara
+  }
+});
+/////////////////////////////////////////////////
+
 // Animación
 function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
