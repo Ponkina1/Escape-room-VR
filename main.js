@@ -84,21 +84,24 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Controles del jugador con el joystick (solo mover cámara, no rotar)
+// Controlar joystick para mover la cámara (sin interferir con la rotación controlada por el VR)
 let joystickX = 0, joystickY = 0;
-const joystickSpeed = 0.1; // Ajustar velocidad de movimiento
+const joystickSpeed = 0.1; // Ajusta la velocidad de movimiento
 
 // Detectar el joystick para mover la cámara
 window.addEventListener('gamepadconnected', (e) => {
   const gamepad = e.gamepad;
 
-  // Configuración del movimiento con el joystick
+  // Función para mover la cámara con el joystick
   function moveCameraWithJoystick() {
     if (gamepad) {
-      joystickX = gamepad.axes[0]; // Movimiento horizontal del joystick
-      joystickY = gamepad.axes[1]; // Movimiento vertical del joystick
+      joystickX = gamepad.axes[0]; // Movimiento horizontal
+      joystickY = gamepad.axes[1]; // Movimiento vertical
 
-      // Mover la cámara en base al joystick
+      // Desactivar el ratón en pantalla
+      renderer.domElement.style.cursor = 'none';
+
+      // Mover la cámara sin cambiar su rotación
       camera.position.x += joystickX * joystickSpeed;
       camera.position.z += joystickY * joystickSpeed;
     }
