@@ -253,6 +253,8 @@ loader.load('Objs/librito.fbx', (object) => {
   });
 });
 
+
+camera.lookAt(0, 1, -3); // Hacer que la cámara mire hacia donde está el libro
 // Inicializar controladores VR
 setupVRControllers();
 
