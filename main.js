@@ -84,20 +84,20 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Controles del jugador con joystick
+// Controles del jugador con el mouse virtual (joystick en modo @D)
 function controls(deltaTime) {
   const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
   
-  // Movimiento con joystick
+  // Movimiento con el ratón virtual
   if (gamepad) {
     const axes = gamepad.axes;
 
-    // Movimiento hacia adelante/atrás con el eje Y del joystick (usualmente el segundo eje)
+    // Movimiento hacia adelante/atrás con el eje Y del ratón (eje[1] del gamepad)
     if (Math.abs(axes[1]) > 0.1) {
       playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * axes[1]));
     }
 
-    // Movimiento hacia los lados con el eje X del joystick (usualmente el primer eje)
+    // Movimiento lateral con el eje X del ratón (eje[0] del gamepad)
     if (Math.abs(axes[0]) > 0.1) {
       playerVelocity.add(getSideVector().multiplyScalar(speedDelta * axes[0]));
     }
