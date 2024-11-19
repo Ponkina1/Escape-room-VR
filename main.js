@@ -6,59 +6,12 @@ import { Octree } from "three/addons/math/Octree.js";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
-// Variables globales para inventario
-const inventory = {
-    items: [],
-    addItem(item) {
-        if (!this.items.includes(item)) {
-            this.items.push(item);
-            updateInventoryDisplay();
-        }
-    }
-};
-
-
-/////////////////////////////////////////////////////////////
-// Crear elemento de inventario en la interfaz
-const inventoryElement = document.createElement('div');
-inventoryElement.style.position = 'absolute';
-inventoryElement.style.top = '10px';
-inventoryElement.style.right = '10px';
-inventoryElement.style.color = 'white';
-inventoryElement.style.backgroundColor = 'rgba(0,0,0,0.5)';
-inventoryElement.style.padding = '10px';
-inventoryElement.style.borderRadius = '5px';
-document.body.appendChild(inventoryElement);
-
-function updateInventoryDisplay() {
-    inventoryElement.innerHTML = '<h3>Inventario:</h3>';
-    inventory.items.forEach(item => {
-        inventoryElement.innerHTML += `<p>• ${item}</p>`;
-    });
-}
-
-
-// Puntero láser
-const pointerGeometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(0, 0, -1)
-]);
-
-const pointerMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-const laserPointer = new THREE.LineSegments(pointerGeometry, pointerMaterial);
-laserPointer.scale.z = 5; // Longitud del puntero
-laserPointer.visible = false;
-
-// Variables para interacción de objetos
-let librito = null;
-////////////////////////////////////////////////////////////
-
 const clock = new THREE.Clock();
 
 // Escena
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x88ccee);
-//scene.fog = new THREE.Fog("#FA612D", 1, 20);
+scene.fog = new THREE.Fog("#FA612D", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -112,37 +65,10 @@ const raycaster = new THREE.Raycaster();
 function setupVRControllers() {
   function onSelectStart() {
     this.userData.isSelecting = true;
-
-            // Añadir puntero láser al controlador
-            this.add(laserPointer);
-            laserPointer.visible = true;
-
-            // Detectar objetos
-        const raycaster = new THREE.Raycaster();
-        raycaster.ray.origin.setFromMatrixPosition(this.matrixWorld);
-        raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.matrixWorld);
-
-        const intersects = raycaster.intersectObjects(scene.children, true);
-
-
-if (intersects.length > 0) {
-            const selectedObject = intersects[0].object;
-            
-            // Recoger librito
-            if (selectedObject.name === 'librito') {
-                selectedObject.visible = false;
-                inventory.addItem('Librito');
-            }
-        }
-            
   }
 
   function onSelectEnd() {
     this.userData.isSelecting = false;
-
-            // Quitar puntero láser
-            this.remove(laserPointer);
-            laserPointer.visible = false;
     
     // Realizar teletransportación si hay una intersección válida
     if (INTERSECTION) {
@@ -315,18 +241,16 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 });
 
 loader.load('Objs/librito.fbx', (object) => {
-    scene.add(object);
-    object.position.set(0, 0.5, -6); // Ajusta la posición del libro
-    object.scale.set(0.4, 0.4, 0.4); // Ajusta la escala si es necesario
-    object.name = 'librito'; // Añadir nombre para identificación
-    librito = object;
+  scene.add(object);
+  object.position.set(0, 0.5, -6);
+  object.scale.set(0.4, 0.4, 0.4);
 
     // Cambiar el color del material a verde
     object.traverse((child) => {
-        if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-        }
-    });
+      if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+      }
+  });
 });
 
 // Inicializar controladores VR
