@@ -1,8 +1,10 @@
-import * as THREE from 'three';
-import { VRButton } from 'https://unpkg.com/three@0.152.0/examples/jsm/webxr/VRButton.js';
-import { Octree } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js";
-import { Capsule } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js";
-import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
+import * as THREE from "three";
+
+import { VRButton } from "three/addons/webxr/VRButton.js";
+import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
+import { Octree } from "three/addons/math/Octree.js";
+import { Capsule } from "three/addons/math/Capsule.js";
+import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
 const clock = new THREE.Clock();
 
