@@ -44,9 +44,6 @@ const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
 
-// Estado VR
-let isInVR = false;
-
 // Event Listeners
 document.addEventListener("keydown", (event) => {
   keyStates[event.code] = true;
@@ -87,13 +84,33 @@ function updatePlayer(deltaTime) {
   camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
 }
 
-// Event Listener para el botón VR (entrar/salir del modo VR)
-renderer.xr.getSession().addEventListener('end', () => {
-  isInVR = false;  // Si se sale del modo VR
-});
+// Controles del jugador con el joystick (solo mover cámara, no rotar)
+let joystickX = 0, joystickY = 0;
+const joystickSpeed = 0.1; // Ajustar velocidad de movimiento
 
-renderer.xr.getSession().addEventListener('start', () => {
-  isInVR = true;   // Si se entra al modo VR
+// Detectar el joystick para mover la cámara
+window.addEventListener('gamepadconnected', (e) => {
+  const gamepad = e.gamepad;
+
+  // Configuración del movimiento con el joystick
+  function moveCameraWithJoystick() {
+    if (gamepad) {
+      joystickX = gamepad.axes[0]; // Movimiento horizontal del joystick
+      joystickY = gamepad.axes[1]; // Movimiento vertical del joystick
+
+      // Mover la cámara en base al joystick
+      camera.position.x += joystickX * joystickSpeed;
+      camera.position.z += joystickY * joystickSpeed;
+    }
+  }
+
+  function update() {
+    moveCameraWithJoystick();
+    renderer.render(scene, camera);
+    requestAnimationFrame(update);
+  }
+
+  update();
 });
 
 // Redimensionar ventana
@@ -124,14 +141,6 @@ function animate() {
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     updatePlayer(deltaTime);
   }
-
-  // Si estamos en VR, usamos los controles VR
-  if (isInVR) {
-    // La rotación de la cámara la maneja el sistema VR, no se mueve por el ratón.
-    // Aquí solo se actualizará la posición de la cámara sin rotarla.
-    // Todo el movimiento de la cámara es manejado por el giroscopio y el control VR.
-  }
-
   renderer.render(scene, camera);
 }
 
