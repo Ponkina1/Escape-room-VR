@@ -143,7 +143,7 @@ loader.load('Objs/librito.fbx', (object) => {
 
 
 /////////////////////////////////////////////////
-/ Función para mover al jugador hacia la dirección de la cámara
+// Función para mover al jugador hacia la dirección de la cámara
 function movePlayerForward() {
   const direction = new THREE.Vector3();  // Vector que indica la dirección
   camera.getWorldDirection(direction);  // Obtiene la dirección en la que está mirando la cámara
