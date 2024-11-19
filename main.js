@@ -15,12 +15,13 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1.6, 0); // Altura estándar de un jugador
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.xr.enabled = true; // Activar soporte XR
+renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(VRButton.createButton(renderer));
 
@@ -37,7 +38,7 @@ const STEPS_PER_FRAME = 5;
 const worldOctree = new Octree();
 const playerCollider = new Capsule(
   new THREE.Vector3(0, 0.35, 0),
-  new THREE.Vector3(0, 1, 0),
+  new THREE.Vector3(0, 1.6, 0),
   0.35
 );
 const playerVelocity = new THREE.Vector3();
@@ -55,8 +56,10 @@ teleportMarker.visible = false;
 
 // Controladores VR
 let controller1, controller2;
+let baseReferenceSpace;
 let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
+const raycaster = new THREE.Raycaster();
 
 // Configurar controladores VR
 function setupVRControllers() {
@@ -69,9 +72,17 @@ function setupVRControllers() {
     
     // Realizar teletransportación si hay una intersección válida
     if (INTERSECTION) {
-      playerCollider.start.copy(INTERSECTION);
-      playerCollider.end.copy(INTERSECTION).add(new THREE.Vector3(0, 1, 0));
-      camera.position.copy(playerCollider.end);
+      // Crear transformación de teleportación
+      const offsetPosition = { x: -INTERSECTION.x, y: -INTERSECTION.y, z: -INTERSECTION.z, w: 1 };
+      const offsetRotation = new THREE.Quaternion();
+      const transform = new XRRigidTransform(offsetPosition, offsetRotation);
+      
+      // Obtener espacio de referencia desplazado
+      const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace(transform);
+      renderer.xr.setReferenceSpace(teleportSpaceOffset);
+      
+      // Ocultar marcador
+      teleportMarker.visible = false;
     }
   }
 
@@ -86,6 +97,11 @@ function setupVRControllers() {
   controller2.addEventListener('selectstart', onSelectStart);
   controller2.addEventListener('selectend', onSelectEnd);
   scene.add(controller2);
+
+  // Almacenar espacio de referencia base
+  renderer.xr.addEventListener('sessionstart', () => {
+    baseReferenceSpace = renderer.xr.getReferenceSpace();
+  });
 }
 
 // Event Listeners
@@ -125,30 +141,22 @@ function updatePlayer(deltaTime) {
   const deltaPosition = playerVelocity.clone().multiplyScalar(deltaTime);
   playerCollider.translate(deltaPosition);
   playerCollisions();
-  camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
+  camera.position.copy(playerCollider.end);
 }
 
-// Controles del jugador
-function controls(deltaTime) {
-  const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
-  if (keyStates["KeyW"]) playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
-  if (keyStates["KeyS"]) playerVelocity.add(getForwardVector().multiplyScalar(-speedDelta));
-  if (keyStates["KeyA"]) playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
-  if (keyStates["KeyD"]) playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
-  if (playerOnFloor && keyStates["Space"]) playerVelocity.y = 15;
-}
-
-// Función para realizar la teletransportación de VR
+// Función de teletransportación de VR
 function teleportInVR() {
-  if (controller1.userData.isSelecting === true || controller2.userData.isSelecting === true) {
+  if ((controller1.userData.isSelecting || controller2.userData.isSelecting)) {
     const controller = controller1.userData.isSelecting ? controller1 : controller2;
     
+    // Configurar matriz temporal del controlador
     tempMatrix.identity().extractRotation(controller.matrixWorld);
 
-    const raycaster = new THREE.Raycaster();
+    // Configurar raycaster desde la posición del controlador
     raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
+    // Buscar intersecciones con el suelo u objetos en la escena
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     if (intersects.length > 0) {
@@ -160,22 +168,6 @@ function teleportInVR() {
       teleportMarker.visible = false;
     }
   }
-}
-
-// Obtener vector de dirección
-function getForwardVector() {
-  camera.getWorldDirection(playerDirection);
-  playerDirection.y = 0;
-  playerDirection.normalize();
-  return playerDirection;
-}
-
-function getSideVector() {
-  camera.getWorldDirection(playerDirection);
-  playerDirection.y = 0;
-  playerDirection.normalize();
-  playerDirection.cross(camera.up);
-  return playerDirection;
 }
 
 // Redimensionar ventana
@@ -206,11 +198,13 @@ setupVRControllers();
 // Animación
 function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
+  
+  teleportInVR(); // Llamar a teleportación antes de actualizar jugador
+  
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
-    controls(deltaTime);
     updatePlayer(deltaTime);
-    teleportInVR(); // Agregar función de teletransportación
   }
+  
   renderer.render(scene, camera);
 }
 
