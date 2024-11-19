@@ -6,6 +6,7 @@ import { Octree } from "three/addons/math/Octree.js";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
+
 const clock = new THREE.Clock();
 
 // Escena
