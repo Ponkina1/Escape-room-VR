@@ -47,6 +47,15 @@ const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
 
+
+// puntos teletrasporte
+const teleportationPoints = [
+    new THREE.Vector3(10, 1.5, 10),  // Punto 1
+    new THREE.Vector3(-10, 1.5, 10), // Punto 2
+    new THREE.Vector3(0, 1.5, -10),  // Punto 3
+  ];
+  
+
 // Event Listeners
 document.addEventListener("keydown", (event) => {
   keyStates[event.code] = true;
@@ -142,24 +151,54 @@ loader.load('Objs/librito.fbx', (object) => {
 });
 
 
-/////////////////////////////////////////////////
-// Función para mover al jugador hacia la dirección de la cámara
-function movePlayerForward() {
-  const direction = new THREE.Vector3();  // Vector que indica la dirección
-  camera.getWorldDirection(direction);  // Obtiene la dirección en la que está mirando la cámara
-  direction.y = 0; // Evitar que el jugador suba o baje
-  direction.normalize();  // Normaliza el vector para que no se mueva más rápido
+//////////////////////////////////////////////////
+// Crear un área de teletransportación visual
+const teleportationAreaGeometry = new THREE.PlaneGeometry(1, 1);
+const teleportationAreaMaterial = new THREE.MeshBasicMaterial({
+  color: 0x00ff00, // Color verde
+  transparent: true,
+  opacity: 0.5
+});
+const teleportationArea = new THREE.Mesh(teleportationAreaGeometry, teleportationAreaMaterial);
+scene.add(teleportationArea);
 
-  // Mover al jugador hacia la dirección de la cámara
-  playerVelocity.addScaledVector(direction, 0.1);  // Ajusta la velocidad aquí
+// Colocar el área al frente del jugador
+teleportationArea.position.set(0, 1.5, -3);
+
+
+
+
+const controller = renderer.xr.getController(0);
+scene.add(controller);
+
+// Función para teletransportar al jugador
+function teleportPlayer(controller) {
+  const controllerPosition = controller.position;
+  
+  // Verificar si el controlador está apuntando hacia el área de teletransportación
+  const distance = controllerPosition.distanceTo(teleportationArea.position);
+
+  if (distance < 2 && keyStates["Space"]) { // Si está cerca y se presiona un botón
+    // Teletransportar al jugador al punto más cercano
+    const closestPoint = teleportationPoints[0]; // Cambiar la lógica para elegir el punto adecuado
+    playerCollider.end.set(closestPoint.x, closestPoint.y, closestPoint.z);
+    camera.position.copy(playerCollider.end); // Sincronizar la cámara
+    console.log("Teleportado a: ", closestPoint);
+  }
 }
 
-// Event listener para detectar cuando se presiona un botón específico (e.g., tecla "W")
-document.addEventListener("keydown", (event) => {
-  if (event.code === "KeyW") {  // Si presionamos la tecla W
-    movePlayerForward();  // Mover al jugador hacia la dirección de la cámara
-  }
-});
+
+controller.addEventListener('selectstart', (event) => {
+    // Este es el momento cuando el jugador presiona un botón
+    keyStates["Space"] = true; // Simula la presión de un botón para teletransportarse
+  });
+  
+  controller.addEventListener('selectend', (event) => {
+    // Fin de la presión del botón
+    keyStates["Space"] = false;
+  });
+  
+
 /////////////////////////////////////////////////
 
 // Animación
@@ -168,6 +207,10 @@ function animate() {
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     updatePlayer(deltaTime);
   }
+
+// Llamar a la lógica de teletransportación
+teleportPlayer(controller);
+
   renderer.render(scene, camera);
 }
 
