@@ -1,3 +1,12 @@
+import * as THREE from "three";
+
+
+
+import { VRButton } from "three/addons/webxr/VRButton.js";
+import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+
 // Clock para la animación
 const clock = new THREE.Clock();
 
