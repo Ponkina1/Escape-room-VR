@@ -1,9 +1,4 @@
-import * as THREE from 'three';
-import { VRButton } from 'https://unpkg.com/three@0.152.0/examples/jsm/webxr/VRButton.js';
-import { Octree } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js";
-import { Capsule } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js";
-import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
-
+// Clock para la animación
 const clock = new THREE.Clock();
 
 // Escena
@@ -13,62 +8,75 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1.5, 0);  // Ajustamos la altura de la cámara para el modo VR
+camera.position.set(0, 1.5, 0);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.xr.enabled = true; // Activar soporte XR
+renderer.xr.enabled = true; // Activar soporte VR
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(VRButton.createButton(renderer));
 
 // Luces
 const ambientLight = new THREE.AmbientLight(0x404040, 1);
 scene.add(ambientLight);
+
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 5, 5);
 scene.add(directionalLight);
 
-// Variables para el jugador
+// Configuración de colisiones y jugador
 const GRAVITY = 30;
 const STEPS_PER_FRAME = 5;
 const worldOctree = new Octree();
+
 const playerCollider = new Capsule(
   new THREE.Vector3(0, 0.35, 0),
   new THREE.Vector3(0, 1, 0),
   0.35
 );
-const playerVelocity = new THREE.Vector3();
-const playerDirection = new THREE.Vector3();
-let playerOnFloor = false;
-const keyStates = {};
 
-// Event Listeners
+const playerVelocity = new THREE.Vector3();
+let playerOnFloor = false;
+
+// Eventos de teclado
+const keyStates = {};
 document.addEventListener("keydown", (event) => {
   keyStates[event.code] = true;
 });
+
 document.addEventListener("keyup", (event) => {
   keyStates[event.code] = false;
 });
-window.addEventListener("resize", onWindowResize);
 
-// Función para manejar colisiones del jugador
-function playerCollisions() {
-  const result = worldOctree.capsuleIntersect(playerCollider);
-  playerOnFloor = false;
-  if (result) {
-    playerOnFloor = result.normal.y > 0;
-    if (!playerOnFloor) {
-      playerVelocity.addScaledVector(result.normal, -result.normal.dot(playerVelocity));
-    }
-    if (result.depth >= 1e-10) {
-      playerCollider.translate(result.normal.multiplyScalar(result.depth));
-    }
+// Evento para redimensionar la ventana
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Cargar modelo con FBXLoader
+const loader = new FBXLoader();
+loader.load('Objs/EscenarioBase.fbx', (object) => {
+  object.scale.set(0.2, 0.2, 0.2);
+  scene.add(object);
+  worldOctree.fromGraphNode(scene);
+});
+
+// Función de animación
+function animate() {
+  const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
+  for (let i = 0; i < STEPS_PER_FRAME; i++) {
+    updatePlayer(deltaTime);
   }
+  renderer.render(scene, camera);
 }
 
-// Función para actualizar el jugador
+renderer.setAnimationLoop(animate);
+
+// Función para actualizar al jugador
 function updatePlayer(deltaTime) {
   let damping = Math.exp(-4 * deltaTime) - 1;
 
@@ -80,71 +88,19 @@ function updatePlayer(deltaTime) {
 
   const deltaPosition = playerVelocity.clone().multiplyScalar(deltaTime);
   playerCollider.translate(deltaPosition);
-  playerCollisions();
-  camera.position.copy(playerCollider.end); // Sincronizar cámara con el jugador
-}
 
-// Controlar joystick para mover la cámara (sin interferir con la rotación controlada por el VR)
-let joystickX = 0, joystickY = 0;
-const joystickSpeed = 0.1; // Ajusta la velocidad de movimiento
+  const result = worldOctree.capsuleIntersect(playerCollider);
+  playerOnFloor = false;
 
-// Detectar el joystick para mover la cámara
-window.addEventListener('gamepadconnected', (e) => {
-  const gamepad = e.gamepad;
-
-  // Función para mover la cámara con el joystick
-  function moveCameraWithJoystick() {
-    if (gamepad) {
-      joystickX = gamepad.axes[0]; // Movimiento horizontal
-      joystickY = gamepad.axes[1]; // Movimiento vertical
-
-      // Desactivar el ratón en pantalla
-      renderer.domElement.style.cursor = 'none';
-
-      // Mover la cámara sin cambiar su rotación
-      camera.position.x += joystickX * joystickSpeed;
-      camera.position.z += joystickY * joystickSpeed;
+  if (result) {
+    playerOnFloor = result.normal.y > 0;
+    if (!playerOnFloor) {
+      playerVelocity.addScaledVector(result.normal, -result.normal.dot(playerVelocity));
+    }
+    if (result.depth >= 1e-10) {
+      playerCollider.translate(result.normal.multiplyScalar(result.depth));
     }
   }
 
-  function update() {
-    moveCameraWithJoystick();
-    renderer.render(scene, camera);
-    requestAnimationFrame(update);
-  }
-
-  update();
-});
-
-// Redimensionar ventana
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.position.copy(playerCollider.end);
 }
-
-// Cargar objetos
-const loader = new FBXLoader();
-loader.load('Objs/EscenarioBase.fbx', (object) => {
-  scene.add(object);
-  object.position.set(0, 0, 0);
-  object.scale.set(0.2, 0.2, 0.2);
-  worldOctree.fromGraphNode(scene);
-});
-
-loader.load('Objs/librito.fbx', (object) => {
-  scene.add(object);
-  object.position.set(0, 0, 0);
-  object.scale.set(0.2, 0.2, 0.2);
-});
-
-// Animación
-function animate() {
-  const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
-  for (let i = 0; i < STEPS_PER_FRAME; i++) {
-    updatePlayer(deltaTime);
-  }
-  renderer.render(scene, camera);
-}
-
-renderer.setAnimationLoop(animate);
