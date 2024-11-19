@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escape Room VR</title>
-    <link rel="stylesheet" href="estilo.css">
-  </head>
 
-  <body>
-    <div id="info">Escape Room y Paula Castro & Katherine Guayazan</div>
-    <div id="timeDisplay">Time: 0.00</div>
-    <div id="scoreDisplay">Puntuación: 0</div>
-    <div id="container"></div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="estilo.css">
+  <title>Galeria Virtual // Realidad Virtual</title>
+</head>
 
-    <script type="module">
-      import * as THREE from 'https://unpkg.com/three@0.152.0/build/three.module.js';
-      import { VRButton } from 'https://unpkg.com/three@0.152.0/examples/jsm/webxr/VRButton.js';
-      import { Octree } from 'https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js';
-      import { Capsule } from 'https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js';
-      import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
-    </script>
+<body>
+  <div id="info">
+    <a href="https://realidadvirtualsb.vercel.app/" target="_blank" rel="noopener">SEBASTIAN BELTRAN</a> - Galeria Virtual RV // SEBASTIAN BELTRAN
+  </div>
 
-    <script type="module" src="js/main.js"></script>
-  </body>
+  <script type="importmap">
+    { 
+      "imports": { 
+        "three": "https://unpkg.com/three@v0.158.0/build/three.module.js", 
+        "three/addons/": "https://unpkg.com/three@v0.158.0/examples/jsm/" 
+      } 
+    }
+  </script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
 </html>
+
