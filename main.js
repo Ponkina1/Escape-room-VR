@@ -58,7 +58,7 @@ const clock = new THREE.Clock();
 // Escena
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x88ccee);
-scene.fog = new THREE.Fog("#FA612D", 1, 20);
+//scene.fog = new THREE.Fog("#FA612D", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -316,7 +316,7 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 
 loader.load('Objs/librito.fbx', (object) => {
     scene.add(object);
-    object.position.set(0, 4, 0);
+    object.position.set(0, 6, 0);
     object.scale.set(0.6, 0.6, 0.6);
     object.name = 'librito'; // Añadir nombre para identificación
     librito = object;
