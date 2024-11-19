@@ -13,6 +13,7 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1.5, 0);  // Ajustamos la altura de la cámara para el modo VR
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -42,7 +43,6 @@ const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
-let gamepad = null; // Guardar la referencia del gamepad
 
 // Event Listeners
 document.addEventListener("keydown", (event) => {
@@ -85,44 +85,23 @@ function updatePlayer(deltaTime) {
 }
 
 // Controles del jugador con el mouse virtual (joystick en modo @D)
-function controls(deltaTime) {
-  const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
-  
-  // Movimiento con el ratón virtual
-  if (gamepad) {
-    const axes = gamepad.axes;
+let lastMouseX = 0, lastMouseY = 0;
 
-    // Movimiento hacia adelante/atrás con el eje Y del ratón (eje[1] del gamepad)
-    if (Math.abs(axes[1]) > 0.1) {
-      playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * axes[1]));
-    }
+// Detectar movimiento del ratón y mover la cámara
+window.addEventListener('mousemove', (event) => {
+  const mouseDeltaX = event.clientX - lastMouseX;
+  const mouseDeltaY = event.clientY - lastMouseY;
 
-    // Movimiento lateral con el eje X del ratón (eje[0] del gamepad)
-    if (Math.abs(axes[0]) > 0.1) {
-      playerVelocity.add(getSideVector().multiplyScalar(speedDelta * axes[0]));
-    }
-  }
+  // Usamos las diferencias de movimiento para ajustar la rotación de la cámara
+  const rotationSpeed = 0.002;
 
-  // Salto con espacio
-  if (playerOnFloor && keyStates["Space"]) playerVelocity.y = 15;
-}
+  camera.rotation.y -= mouseDeltaX * rotationSpeed;  // Rotación horizontal
+  camera.rotation.x -= mouseDeltaY * rotationSpeed;  // Rotación vertical
+  camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));  // Limitar rotación vertical
 
-// Obtener el vector de dirección (mover hacia adelante)
-function getForwardVector() {
-  camera.getWorldDirection(playerDirection);
-  playerDirection.y = 0;
-  playerDirection.normalize();
-  return playerDirection;
-}
-
-// Obtener el vector de dirección lateral (mover a los lados)
-function getSideVector() {
-  camera.getWorldDirection(playerDirection);
-  playerDirection.cross(camera.up); // Usar el "up" de la cámara para calcular el lado
-  playerDirection.y = 0;
-  playerDirection.normalize();
-  return playerDirection;
-}
+  lastMouseX = event.clientX;
+  lastMouseY = event.clientY;
+});
 
 // Redimensionar ventana
 function onWindowResize() {
@@ -146,23 +125,10 @@ loader.load('Objs/librito.fbx', (object) => {
   object.scale.set(0.2, 0.2, 0.2);
 });
 
-// Detectar y asignar el gamepad
-function detectGamepad() {
-  const gamepads = navigator.getGamepads();
-  for (let i = 0; i < gamepads.length; i++) {
-    if (gamepads[i]) {
-      gamepad = gamepads[i];
-      break;
-    }
-  }
-}
-
 // Animación
 function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
-  detectGamepad(); // Detecta el gamepad en cada frame
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
-    controls(deltaTime);
     updatePlayer(deltaTime);
   }
   renderer.render(scene, camera);
