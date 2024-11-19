@@ -85,15 +85,20 @@ function controls(deltaTime) {
   if (controller) {
     const gamepad = controller.gamepad;
     if (gamepad) {
-      const thumbstick = gamepad.axes[1]; // Controlar el movimiento hacia adelante/atrás
+      // Verificamos el estado de los botones y del thumbstick
+      console.log("Controlador conectado:", gamepad);
+
+      // Dirección del thumbstick (axis 1) para avanzar
+      const thumbstick = gamepad.axes[1]; // control hacia adelante/atrás
       if (Math.abs(thumbstick) > 0.1) {
+        console.log("Movimiento detectado en el thumbstick:", thumbstick);
         playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * thumbstick));
       }
 
-      // Si el jugador presiona el botón de acción (como el botón de selección del controlador)
-      const buttonPressed = gamepad.buttons[0].pressed; // 0 puede ser un botón específico
+      // Si el jugador presiona un botón de acción (botón 0)
+      const buttonPressed = gamepad.buttons[0].pressed;
       if (buttonPressed) {
-        // Aquí puedes hacer que el jugador avance al presionar el botón del controlador
+        console.log("Botón presionado en el controlador.");
         playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
       }
     }
@@ -148,13 +153,13 @@ loader.load('Objs/librito.fbx', (object) => {
 // Detectar controlador de VR
 function onControllerConnected(event) {
   controller = event.target;
+  console.log("Controlador conectado:", controller);
   controller.addEventListener("selectstart", onControllerSelectStart);
   controller.addEventListener("selectend", onControllerSelectEnd);
 }
 
 function onControllerSelectStart(event) {
   console.log("Botón presionado");
-  // Se puede agregar una acción cuando se presione el botón
 }
 
 function onControllerSelectEnd(event) {
