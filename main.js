@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { VRButton } from 'https://unpkg.com/three@0.152.0/examples/jsm/webxr/VRButton.js';
 import { Octree } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Octree.js";
-import { Capsule } from "https://unpkg.com/three@0.152.0/examples/jsm/math/Capsule.js";
 import { FBXLoader } from 'https://unpkg.com/three@0.152.0/examples/jsm/loaders/FBXLoader.js';
 
 const clock = new THREE.Clock();
@@ -33,7 +32,7 @@ scene.add(directionalLight);
 const GRAVITY = 30;
 const STEPS_PER_FRAME = 5;
 const worldOctree = new Octree();
-const playerCollider = new Capsule(
+const playerCollider = new THREE.Capsule(
   new THREE.Vector3(0, 0.35, 0),
   new THREE.Vector3(0, 1, 0),
   0.35
@@ -41,9 +40,15 @@ const playerCollider = new Capsule(
 const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
-let controller = null; // Controlador Bluetooth
+const keyStates = {};
 
 // Event Listeners
+document.addEventListener("keydown", (event) => {
+  keyStates[event.code] = true;
+});
+document.addEventListener("keyup", (event) => {
+  keyStates[event.code] = false;
+});
 window.addEventListener("resize", onWindowResize);
 
 // Función para manejar colisiones del jugador
@@ -81,32 +86,20 @@ function updatePlayer(deltaTime) {
 function controls(deltaTime) {
   const speedDelta = deltaTime * (playerOnFloor ? 25 : 8);
   
-  // Movimiento con el controlador Bluetooth (thumbstick o botón)
-  if (controller) {
-    const gamepad = controller.gamepad;
-    if (gamepad) {
-      // Verificamos el estado de los botones y del thumbstick
-      console.log("Controlador conectado:", gamepad);
-
-      // Dirección del thumbstick (axis 1) para avanzar
-      const thumbstick = gamepad.axes[1]; // control hacia adelante/atrás
-      if (Math.abs(thumbstick) > 0.1) {
-        console.log("Movimiento detectado en el thumbstick:", thumbstick);
-        playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * thumbstick));
-      }
-
-      // Si el jugador presiona un botón de acción (botón 0)
-      const buttonPressed = gamepad.buttons[0].pressed;
-      if (buttonPressed) {
-        console.log("Botón presionado en el controlador.");
-        playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
-      }
-    }
-  }
-
   // Movimiento con teclas (tecla "C" para avanzar)
   if (keyStates["KeyC"]) {
     playerVelocity.add(getForwardVector().multiplyScalar(speedDelta));
+  }
+
+  // Movimiento con controlador Bluetooth usando la API de Gamepad
+  const gamepads = navigator.getGamepads();
+  const gamepad = gamepads[0]; // Usamos el primer gamepad (en caso de tener múltiples)
+
+  if (gamepad) {
+    const thumbstickY = gamepad.axes[1]; // El eje Y controla el movimiento hacia adelante/atrás
+    if (Math.abs(thumbstickY) > 0.1) {
+      playerVelocity.add(getForwardVector().multiplyScalar(speedDelta * thumbstickY));
+    }
   }
 
   if (playerOnFloor && keyStates["Space"]) playerVelocity.y = 15;
@@ -150,22 +143,6 @@ loader.load('Objs/librito.fbx', (object) => {
   object.scale.set(0.2, 0.2, 0.2);
 });
 
-// Detectar controlador de VR
-function onControllerConnected(event) {
-  controller = event.target;
-  console.log("Controlador conectado:", controller);
-  controller.addEventListener("selectstart", onControllerSelectStart);
-  controller.addEventListener("selectend", onControllerSelectEnd);
-}
-
-function onControllerSelectStart(event) {
-  console.log("Botón presionado");
-}
-
-function onControllerSelectEnd(event) {
-  console.log("Botón liberado");
-}
-
 // Animación
 function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
@@ -175,9 +152,5 @@ function animate() {
   }
   renderer.render(scene, camera);
 }
-
-// Agregar controlador de VR
-renderer.xr.getController(0).addEventListener("connected", onControllerConnected);
-renderer.xr.getController(1).addEventListener("connected", onControllerConnected);
 
 renderer.setAnimationLoop(animate);
