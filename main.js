@@ -121,9 +121,7 @@ function setupVRControllers() {
           window.alert("¡Objeto coleccionable detectado!");
           pickUpObject(pickedObject);
           return;
-        } else {
-          window.alert("Objeto detectado no es coleccionable: " + (pickedObject.name || "Sin nombre"));
-        }
+        } 
       }
 
       const offsetPosition = { x: -INTERSECTION.x, y: -INTERSECTION.y, z: -INTERSECTION.z, w: 1 };
