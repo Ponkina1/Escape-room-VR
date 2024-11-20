@@ -257,7 +257,9 @@ function updateRaycaster() {
         progressBar.visible = false;
         if (detectedObject.name === "CollectibleGeometry") {
           pickUpObject(detectedObject);
-        }
+        } else if (detectedObject.name === "SphereCollectible") {
+          pickUpObject(detectedObject);
+  } 
         lookingAtObject = null;
       }
     }
