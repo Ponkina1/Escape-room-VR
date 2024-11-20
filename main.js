@@ -22,6 +22,7 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.6, 0);
 
+
 // Renderer con optimizaciones móviles
 const renderer = new THREE.WebGLRenderer({ 
   antialias: false,
@@ -33,6 +34,27 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(VRButton.createButton(renderer));
+
+
+
+/////////////////////////////////////////
+// Crear un listener de audio y añadirlo a la cámara
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+// Crear un objeto de audio y vincularlo al listener
+const backgroundMusic = new THREE.Audio(listener);
+
+// Cargar un archivo de audio
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load('SawThemeSong.mp3', function (buffer) {
+  backgroundMusic.setBuffer(buffer);
+  backgroundMusic.setLoop(true); // Música en bucle
+  backgroundMusic.setVolume(0.5); // Volumen de la música
+  backgroundMusic.play(); // Reproducir
+});
+
+///////////////////////////////////////
 
 // Sistema de UI en VR
 class VRMessageSystem {
