@@ -38,6 +38,8 @@ document.body.appendChild(VRButton.createButton(renderer));
 
 
 /////////////////////////////////////////
+let audioContext;
+
 // Crear un listener de audio y añadirlo a la cámara
 const listener = new THREE.AudioListener();
 camera.add(listener);
