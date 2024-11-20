@@ -29,6 +29,111 @@ renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(VRButton.createButton(renderer));
 
+// Sistema de UI en VR
+class VRMessageSystem {
+  constructor(scene, camera) {
+    // Panel de mensajes principal
+    const panelGeometry = new THREE.PlaneGeometry(2, 0.5);
+    const panelMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide
+    });
+    this.messagePanel = new THREE.Mesh(panelGeometry, panelMaterial);
+    this.messagePanel.visible = false;
+    scene.add(this.messagePanel);
+
+    // Canvas para el texto del mensaje
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 512;
+    canvas.height = 128;
+    
+    this.messageTexture = new THREE.CanvasTexture(canvas);
+    this.messageContext = context;
+    const messageMaterial = new THREE.MeshBasicMaterial({
+      map: this.messageTexture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    
+    const messageGeometry = new THREE.PlaneGeometry(2, 0.5);
+    this.messageText = new THREE.Mesh(messageGeometry, messageMaterial);
+    this.messagePanel.add(this.messageText);
+
+    // Panel del contador
+    const counterGeometry = new THREE.PlaneGeometry(0.6, 0.2);
+    const counterMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide
+    });
+    this.counterPanel = new THREE.Mesh(counterGeometry, counterMaterial);
+    this.counterPanel.position.set(-1.5, 1.5, -2);
+    scene.add(this.counterPanel);
+
+    // Texto del contador
+    const counterCanvas = document.createElement('canvas');
+    counterCanvas.width = 256;
+    counterCanvas.height = 64;
+    this.counterTexture = new THREE.CanvasTexture(counterCanvas);
+    const counterTextMaterial = new THREE.MeshBasicMaterial({
+      map: this.counterTexture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    this.counterText = new THREE.Mesh(counterGeometry, counterTextMaterial);
+    this.counterPanel.add(this.counterText);
+
+    this.camera = camera;
+    this.updateCounter(0, 3);
+  }
+
+  showMessage(message, duration = 3000) {
+    this.messageContext.clearRect(0, 0, 512, 128);
+    this.messageContext.fillStyle = 'white';
+    this.messageContext.font = '32px Arial';
+    this.messageContext.textAlign = 'center';
+    this.messageContext.textBaseline = 'middle';
+    this.messageContext.fillText(message, 256, 64);
+    this.messageTexture.needsUpdate = true;
+
+    // Posicionar frente a la cámara
+    const cameraDirection = new THREE.Vector3();
+    this.camera.getWorldDirection(cameraDirection);
+    this.messagePanel.position.copy(this.camera.position).add(cameraDirection.multiplyScalar(-2));
+    this.messagePanel.lookAt(this.camera.position);
+    this.messagePanel.visible = true;
+
+    setTimeout(() => {
+      this.messagePanel.visible = false;
+    }, duration);
+  }
+
+  updateCounter(collected, total) {
+    const ctx = this.counterTexture.image.getContext('2d');
+    ctx.clearRect(0, 0, 256, 64);
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Objetos: ${collected}/${total}`, 128, 32);
+    this.counterTexture.needsUpdate = true;
+  }
+
+  update() {
+    // Actualizar posición del contador
+    const cameraDirection = new THREE.Vector3();
+    this.camera.getWorldDirection(cameraDirection);
+    this.counterPanel.position.copy(this.camera.position);
+    this.counterPanel.position.y += 0.3;
+    this.counterPanel.position.x -= 0.5;
+    this.counterPanel.lookAt(this.camera.position);
+  }
+}
+
 // Optimized lighting for mobile
 const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
 scene.add(ambientLight);
@@ -56,6 +161,9 @@ const allCollectibles = [
   "SphereCollectible", 
   "CubeCollectible"
 ];
+
+// Crear sistema de mensajes
+const messageSystem = new VRMessageSystem(scene, camera);
 
 // Crear geometría básica (un dodecaedro)
 const geometry = new THREE.DodecahedronGeometry(0.5);
@@ -110,24 +218,24 @@ scene.add(progressBar);
 function checkDoorCondition() {
   const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
   const allCollected = requiredItems.every(item => collectedItems.includes(item));
+  
   if (allCollected) {
-    alert("¡Has ganado! Todos los objetos han sido recolectados.");
-    // Cambiar el color de la puerta cuando se han recolectado todos los objetos
+    messageSystem.showMessage("¡Has ganado! ¡Todos los objetos recolectados!");
     const door = scene.getObjectByName("DoorCollectible");
     if (door) {
       door.material.color.setHex(0xff0000);
     }
   } else {
-    const missingItems = requiredItems.filter(item => !collectedItems.includes(item));
-    alert(`Aún necesitas recolectar los siguientes objetos: ${missingItems.join(", ")}`);
+    const missing = requiredItems.filter(item => !collectedItems.includes(item)).length;
+    messageSystem.showMessage(`Te faltan ${missing} objetos por recolectar`);
   }
 }
 
 // Función para recoger objetos
 function pickUpObject(object) {
   collectedItems.push(object.name);
-  console.log("Recogido:", object.name);
-  console.log("Objetos recogidos:", collectedItems);
+  messageSystem.showMessage(`¡Objeto recolectado!`);
+  messageSystem.updateCounter(collectedItems.length, allCollectibles.length);
 
   if (object.parent) {
     object.parent.remove(object);
