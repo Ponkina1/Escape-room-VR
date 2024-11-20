@@ -72,6 +72,14 @@ sphereCollectible.position.set(-2, 1, -4);
 sphereCollectible.name = "SphereCollectible";
 scene.add(sphereCollectible);
 
+// Objeto 2: Cubo
+const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff, shininess: 100 });
+const cubeCollectible = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cubeCollectible.position.set(3, 1.5, -8);
+cubeCollectible.name = "CubeCollectible";
+scene.add(cubeCollectible);
+
 let lookingAtObject = null;
 let lookStartTime = 0;
 const lookDuration = 2000;
@@ -259,7 +267,9 @@ function updateRaycaster() {
           pickUpObject(detectedObject);
         } else if (detectedObject.name === "SphereCollectible") {
           pickUpObject(detectedObject);
-  } 
+   } else if (detectedObject.name === "CubeCollectible") {
+    pickUpObject(detectedObject);
+  }
         lookingAtObject = null;
       }
     }
