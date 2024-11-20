@@ -262,16 +262,16 @@ scene.add(sphereCollectible);
 const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff, shininess: 100 });
 const cubeCollectible = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cubeCollectible.position.set(3, 1.5, -8);
+cubeCollectible.position.set(3, 1.5, -5);
 cubeCollectible.name = "CubeCollectible";
 scene.add(cubeCollectible);
 
 // Puerta
-const doorGeometry = new THREE.BoxGeometry(3, 7, 1);
+const doorGeometry = new THREE.BoxGeometry(4, 7, 1);
 const doorMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
 const door = new THREE.Mesh(doorGeometry, doorMaterial);
 door.name = "DoorCollectible";
-door.position.set(0, 5, -8);
+door.position.set(-0.5, 4, -9);
 scene.add(door);
 
 // Variables para el sistema de mirada
