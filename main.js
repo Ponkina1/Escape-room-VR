@@ -220,11 +220,11 @@ function checkDoorCondition() {
   const allCollected = requiredItems.every(item => collectedItems.includes(item));
   
   if (allCollected) {
-    alert("¡Has ganado! Todos los objetos han sido recolectados.");
     const door = scene.getObjectByName("DoorCollectible");
     if (door) {
       door.material.color.setHex(0xff0000);
     }
+    alert("¡Has ganado! Todos los objetos han sido recolectados.");
   } else {
     const missing = requiredItems.filter(item => !collectedItems.includes(item)).length;
     messageSystem.showMessage(`Te faltan ${missing} objetos por recolectar`);
