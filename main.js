@@ -220,7 +220,7 @@ function checkDoorCondition() {
   const allCollected = requiredItems.every(item => collectedItems.includes(item));
   
   if (allCollected) {
-    messageSystem.showMessage("¡Has ganado! ¡Todos los objetos recolectados!");
+    alert("¡Has ganado! Todos los objetos han sido recolectados.");
     const door = scene.getObjectByName("DoorCollectible");
     if (door) {
       door.material.color.setHex(0xff0000);
