@@ -335,13 +335,17 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 const objLoader = new OBJLoader();
 objLoader.load('Torre.obj', (object) => {
   // Agregar el objeto cargado a la escena
-  object.scale.set(0.8, 0.8, 0.8); 
-  object.position.set(0, 2, -6);// Escalar el modelo si es necesario
   scene.add(object);
+  object.position.set(0, 2, -6);// Escalar el modelo si es necesario
+  object.scale.set(0.8, 0.8, 0.8); 
   object.name = "Torre";
   worldOctree.fromGraphNode(scene);
 },);
 ////////////////////////////////////////
+const rayHelper = new THREE.ArrowHelper(raycaster.ray.direction, raycaster.ray.origin, 10, 0xff0000);
+scene.add(rayHelper);
+
+//////////////////////////////////////
 
 // Inicializar controladores VR
 setupVRControllers();
