@@ -18,18 +18,22 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.6, 0); // Altura estándar de un jugador
 
-// Renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+// Renderer with mobile optimizations
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: false,  // Disable antialiasing for better mobile performance
+  powerPreference: "high-performance",
+  precision: "mediump"  // Use medium precision for better mobile performance
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 document.body.appendChild(VRButton.createButton(renderer));
 
-// Luces
-const ambientLight = new THREE.AmbientLight(0x404040, 1);
+// Optimized lighting for mobile
+const ambientLight = new THREE.AmbientLight(0x404040, 1.5); // Increased intensity
 scene.add(ambientLight);
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
 directionalLight.position.set(5, 5, 5);
 scene.add(directionalLight);
 
