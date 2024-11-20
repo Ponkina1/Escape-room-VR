@@ -50,10 +50,21 @@ const playerVelocity = new THREE.Vector3();
 const playerDirection = new THREE.Vector3();
 let playerOnFloor = false;
 const keyStates = {};
-const collectedObjects = [];
+const collectedItems = [];
 
-// Variable para almacenar la referencia a la torre
-let towerObject = null;
+
+////////////////////////////////////////////
+// Función para recoger objetos
+function pickUpObject(object) {
+  // Agregar el nombre del objeto a la lista
+  collectedItems.push(object.name);
+  console.log("Recogido:", object.name);
+  console.log("Objetos recogidos:", collectedItems);
+
+  // Remover el objeto de la escena
+  scene.remove(object);
+}
+///////////////////////////////////////////
 
 // Marcador de teletransportación
 const teleportMarker = new THREE.Mesh(
@@ -70,49 +81,10 @@ let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
 const raycaster = new THREE.Raycaster();
 
-
-/////////////////////////////////////////////////
-function handleObjectInteraction(intersectedObject) {
-  if (isInteractiveObject(intersectedObject)) {
-    // Guardar la torre en la lista de objetos recolectados
-    collectedObjects.push({
-      type: 'tower',
-      position: towerObject.position.clone(),
-      rotation: towerObject.rotation.clone(),
-      scale: towerObject.scale.clone()
-    });
-    
-    // Remover la torre de la escena
-    scene.remove(towerObject);
-    towerObject = null;
-    
-    console.log('Torre recolectada!');
-    console.log('Objetos recolectados:', collectedObjects);
-    return true;
-  }
-  return false;
-}
-////////////////////////////////////////////////
-
-
-
 // Configurar controladores VR
 function setupVRControllers() {
   function onSelectStart() {
     this.userData.isSelecting = true;
-
-     // Verificar interacción con objetos
-     tempMatrix.identity().extractRotation(this.matrixWorld);
-     raycaster.ray.origin.setFromMatrixPosition(this.matrixWorld);
-     raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-     const intersects = raycaster.intersectObjects(scene.children, true);
-     if (intersects.length > 0) {
-       const intersectedObject = intersects[0].object;
-       if (handleObjectInteraction(intersectedObject)) {
-         return; // Si se interactuó con un objeto, no continuar con la teletransportación
-       }
-     }
   }
 
   function onSelectEnd() {
@@ -208,13 +180,6 @@ function teleportInVR() {
       const intersects = raycaster.intersectObjects(scene.children, true);
   
       if (intersects.length > 0) {
-
-         // No permitir teletransportación si se está interactuando con un objeto interactivo
-      if (isInteractiveObject(intersects[0].object)) {
-        INTERSECTION = undefined;
-        teleportMarker.visible = false;
-        return;
-      }
         // Nueva verificación de colisiones para teletransportación
         const teleportPoint = intersects[0].point;
         const tempPlayerCollider = new Capsule(
@@ -246,34 +211,40 @@ function teleportInVR() {
   /////////////////////////////////////////////////////////
   function onSelectEnd() {
     this.userData.isSelecting = false;
-    
-    // Realizar teletransportación si hay una intersección válida
+  
+    // Si hay una intersección válida, verificar si es un objeto recogible
     if (INTERSECTION) {
-      // Crear una nueva posición de jugador con el punto de teletransportación
+      // Detectar el objeto bajo el raycaster
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      if (intersects.length > 0) {
+        const pickedObject = intersects[0].object;
+  
+        // Verificar si el objeto tiene un nombre válido para recoger
+        if (pickedObject.name && pickedObject.name.startsWith("Torre")) {
+          pickUpObject(pickedObject);
+          return; // No realizar teletransportación si recogemos un objeto
+        }
+      }
+  
+      // Teletransportación
       playerCollider.start.copy(new THREE.Vector3(
-        INTERSECTION.x, 
-        INTERSECTION.y + 0.35, 
+        INTERSECTION.x,
+        INTERSECTION.y + 0.35,
         INTERSECTION.z
       ));
       playerCollider.end.copy(new THREE.Vector3(
-        INTERSECTION.x, 
-        INTERSECTION.y + 1.6, 
+        INTERSECTION.x,
+        INTERSECTION.y + 1.6,
         INTERSECTION.z
       ));
-  
-      // Actualizar posición de la cámara
       camera.position.copy(playerCollider.end);
-      
-      // Crear transformación de teleportación
+  
       const offsetPosition = { x: -INTERSECTION.x, y: -INTERSECTION.y, z: -INTERSECTION.z, w: 1 };
       const offsetRotation = new THREE.Quaternion();
       const transform = new XRRigidTransform(offsetPosition, offsetRotation);
-      
-      // Obtener espacio de referencia desplazado
+  
       const teleportSpaceOffset = baseReferenceSpace.getOffsetReferenceSpace(transform);
       renderer.xr.setReferenceSpace(teleportSpaceOffset);
-      
-      // Ocultar marcador
       teleportMarker.visible = false;
     }
   }
@@ -299,11 +270,12 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 // Cargar el modelo OBJ
 const objLoader = new OBJLoader();
 objLoader.load('Torre.obj', (object) => {
+  object.name = "Torre";
   // Agregar el objeto cargado a la escena
+  object.scale.set(0, 0.8, -6); 
+  object.position.set(2, 2, 2);// Escalar el modelo si es necesario
   scene.add(object);
-  object.scale.set(0.8, 0.8, 0.8); 
-  object.position.set(0, 2, -6);// Escalar el modelo si es necesario
-});
+},);
 ////////////////////////////////////////
 
 // Inicializar controladores VR
