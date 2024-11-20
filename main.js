@@ -63,6 +63,15 @@ collectibleObject.position.set(0, 2, -6);
 collectibleObject.name = "CollectibleGeometry";
 scene.add(collectibleObject);
 
+
+// Objeto 1: Esfera
+const sphereGeometry = new THREE.SphereGeometry(0.5);
+const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
+const sphereCollectible = new THREE.Mesh(sphereGeometry, sphereMaterial);
+sphereCollectible.position.set(-2, 1, -4);
+sphereCollectible.name = "SphereCollectible";
+scene.add(sphereCollectible);
+
 let lookingAtObject = null;
 let lookStartTime = 0;
 const lookDuration = 2000;
@@ -272,9 +281,6 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
   object.scale.set(0.4, 0.4, 0.4);
   worldOctree.fromGraphNode(scene);
 });
-
-const rayHelper = new THREE.ArrowHelper(raycaster.ray.direction, raycaster.ray.origin, 10, 0xff0000);
-scene.add(rayHelper);
 
 setupVRControllers();
 
