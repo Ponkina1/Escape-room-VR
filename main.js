@@ -339,6 +339,7 @@ objLoader.load('Torre.obj', (object) => {
   object.position.set(0, 2, -6);// Escalar el modelo si es necesario
   scene.add(object);
   object.name = "Torre";
+  worldOctree.fromGraphNode(scene);
 },);
 ////////////////////////////////////////
 
