@@ -688,45 +688,65 @@ objLoader.load("Objs/Almacen.obj", function (object) {
   scene.add(object);
 });
 
-// Cargar el objeto "cajas.obj"
-objLoader.load('Objs/cajas.obj', (object) => {
-  applyTexturesToObject(object);  // Aplicar las texturas al objeto
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materialq = new THREE.MeshPhongMaterial({map: cajaTexture});
+objLoader.load("Objs/cajas.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materialq; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
 
-// Cargar el objeto "Engranajes.obj"
-objLoader.load('Objs/Engranajes.obj', (object) => {
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materialr = new THREE.MeshPhongMaterial({color: "gray"});
+objLoader.load("Objs/Engranajes.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materialr; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
 
-// Cargar el objeto "Mesa.obj"
-objLoader.load('Objs/Mesa.obj', (object) => {
-  applyTexturesToObject(object);  // Aplicar las texturas al objeto
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materials = new THREE.MeshPhongMaterial({map: mesaTexture});
+objLoader.load("Objs/Mesa.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materials; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
 
-// Cargar el objeto "posters.obj"
-objLoader.load('Objs/posters.obj', (object) => {
-  applyTexturesToObject(object);  // Aplicar las texturas al objeto
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materialf = new THREE.MeshPhongMaterial({map: poster1Texture});
+objLoader.load("Objs/posters.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materialf; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
 
-// Cargar el objeto "puzzle.obj"
-objLoader.load('Objs/puzzle.obj', (object) => {
-  applyTexturesToObject(object);  // Aplicar las texturas al objeto
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materialp = new THREE.MeshPhongMaterial({map: placaEngranajeTexture});
+objLoader.load("Objs/puzzle.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materialp; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
-
 
 setupVRControllers();
 
@@ -744,4 +764,3 @@ function animate() {
 }
 
 renderer.setAnimationLoop(animate);
-
