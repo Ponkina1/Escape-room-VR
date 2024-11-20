@@ -567,77 +567,77 @@ function applyTexturesToObject(object) {
   object.traverse((child) => {
     if (child.isMesh) {
       // Asignar las texturas a los meshes correspondientes
-      if (child.isMesh) {
+      if (child.name === 'AlmacenArmario') {
         child.material = new THREE.MeshStandardMaterial({
           map: almacenTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'AlmacenArmario1') {
         child.material = new THREE.MeshStandardMaterial({
           map: almacenTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'AlmacenArmario2') {
         child.material = new THREE.MeshBasicMaterial({
           map: almacenTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'AlmacenArmario3') {
         child.material = new THREE.MeshBasicMaterial({
           map: almacenTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Caja') {
         child.material = new THREE.MeshBasicMaterial({
           map: cajaTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Caja2') {
         child.material = new THREE.MeshBasicMaterial({
           map: cajaTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Caja3') {
         child.material = new THREE.MeshBasicMaterial({
           map: cajaTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Caja4') {
         child.material = new THREE.MeshBasicMaterial({
           map: cajaTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'AlmacenArmario4') {
         child.material = new THREE.MeshBasicMaterial({
           map: almacenTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Mesa') {
         child.material = new THREE.MeshBasicMaterial({
           map: mesaTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Poster') {
         child.material = new THREE.MeshBasicMaterial({
           map: poster1Texture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Poster2') {
         child.material = new THREE.MeshBasicMaterial({
           map: poster2Texture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'Poster3') {
         child.material = new THREE.MeshBasicMaterial({
           map: poster3Texture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'PanelAcertijo') {
         child.material = new THREE.MeshBasicMaterial({
           map: placaCodigoTexture
         });
       }
-      if (child.isMesh) {
+      if (child.name === 'PanelServicio') {
         child.material = new THREE.MeshBasicMaterial({
           map: placaEngranajeTexture
         });
@@ -650,6 +650,7 @@ function applyTexturesToObject(object) {
     }
   });
 }
+
 
 // Cargar escenario base
 const loader = new FBXLoader();
@@ -675,12 +676,16 @@ objLoader.load('Objs/villana.obj', (object) => {
   console.error('Error al cargar el modelo OBJ:', error);
 });
 
-// Cargar el objeto "Almacen.obj"
-objLoader.load('Objs/Almacen.obj', (object) => {
-  applyTexturesToObject(object);  // Aplicar las texturas al objeto
-  scene.add(object);             // Agregar a la escena
-  object.position.set(0, 0, 0);  // Posicionar en la escena
+const materialP = new THREE.MeshPhongMaterial({map: almacenTexture});
+objLoader.load("Objs/Almacen.obj", function (object) {
+  object.traverse(function (child) {
+    if (child.isMesh) {
+      child.material = materialP; // Asigna el material si es necesario
+      object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+    }
+  });
+  scene.add(object);
 });
 
 // Cargar el objeto "cajas.obj"
@@ -739,3 +744,4 @@ function animate() {
 }
 
 renderer.setAnimationLoop(animate);
+
