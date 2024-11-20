@@ -245,40 +245,17 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
   worldOctree.fromGraphNode(scene);
 });
 
-loader.load('Objs/librito.fbx', (object) => {
-  scene.add(object);
-  object.position.set(0, 0.5, -6);
-  object.scale.set(0.4, 0.4, 0.4);
-
-  worldOctree.fromGraphNode(scene);
-
-    // Cambiar el color del material a verde
-    object.traverse((child) => {
-      if (child.isMesh) {
-          child.material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-      }
-  });
-});
-
 ////////////////////////////////
 // Cargar el modelo OBJ
 const objLoader = new OBJLoader();
 objLoader.load('Torre.obj', (object) => {
   // Agregar el objeto cargado a la escena
   scene.add(object);
-  object.scale.set(0.8, 0.8, 0.8); 
+  object.scale.set(0, 0.8, -6); 
   object.position.set(2, 2, 2);// Escalar el modelo si es necesario
 },);
 ////////////////////////////////////////
 
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
-const cube = new THREE.Mesh(geometry, material);
-cube.position.set(0, 1, -3);
-scene.add(cube);
-
-
-camera.lookAt(0, 1, -3); // Hacer que la cámara mire hacia donde está el libro
 // Inicializar controladores VR
 setupVRControllers();
 
