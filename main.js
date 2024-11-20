@@ -58,17 +58,6 @@ const material = new THREE.MeshPhongMaterial({
   shininess: 100
 });
 
-const geometry1 = new THREE.DodecahedronGeometry(0.5);
-const material1 = new THREE.MeshPhongMaterial({ 
-  color: 0x00ff00,
-  shininess: 100
-});
-
-const collectibleObject1 = new THREE.Mesh(geometry1, material1);
-collectibleObject.position.set(4, 2, -6);
-collectibleObject.name = "CollectibleGeometry1";
-scene.add(collectibleObject1);
-
 const collectibleObject = new THREE.Mesh(geometry, material);
 collectibleObject.position.set(0, 2, -6);
 collectibleObject.name = "CollectibleGeometry";
@@ -130,11 +119,6 @@ function setupVRControllers() {
         const pickedObject = intersects[0].object;
 
         if (pickedObject.name === "CollectibleGeometry") {
-          window.alert("¡Objeto coleccionable detectado!");
-          pickUpObject(pickedObject);
-          return;
-        } 
-        else if (pickedObject.name === "CollectibleGeometry1") {
           window.alert("¡Objeto coleccionable detectado!");
           pickUpObject(pickedObject);
           return;
