@@ -500,12 +500,44 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+/////////////////////////////////////////////////////////
+// Cargar las texturas
+const textureLoader = new THREE.TextureLoader();
+
+// Cargar las texturas de Pared y Piso
+const paredTexture = textureLoader.load('Uv/Paredes.png');
+const pisoTexture = textureLoader.load('Uv/Piso.png');
+
+// Función para aplicar las texturas al escenario
+function applyTexturesToScene(scene) {
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      // Asignar la textura de la pared al mesh llamado 'pared'
+      if (child.name === 'pared') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: paredTexture
+        });
+      }
+      // Asignar la textura del piso al mesh llamado 'pisos'
+      if (child.name === 'pisos') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: pisoTexture
+        });
+      }
+    }
+  });
+}
+
 // Cargar escenario base
 const loader = new FBXLoader();
 loader.load('Objs/EscenarioBase.fbx', (object) => {
   scene.add(object);
   object.position.set(0, 0, 0);
   object.scale.set(0.4, 0.4, 0.4);
+
+    // Aplicar las texturas al escenario cargado
+    applyTexturesToScene(object);
+    
   worldOctree.fromGraphNode(scene);
 });
 
