@@ -51,16 +51,32 @@ let playerOnFloor = false;
 const keyStates = {};
 const collectedItems = [];
 
-// Crear geometría básica (un dodecaedro) en lugar de la torre
-const geometry = new THREE.DodecahedronGeometry(0.5);
-const material = new THREE.MeshPhongMaterial({ 
-  color: 0x00ff00,
-  shininess: 100
-});
-const collectibleObject = new THREE.Mesh(geometry, material);
-collectibleObject.position.set(0, 2, -6);
-collectibleObject.name = "CollectibleGeometry";
-scene.add(collectibleObject);
+// Crear varios objetos recolectables manualmente
+const collectible1 = collectibleObject.clone();
+collectible1.position.set(-2, 1, -4);
+collectible1.name = "Collectible1";
+scene.add(collectible1);
+
+const collectible2 = collectibleObject.clone();
+collectible2.position.set(3, 1.5, -8);
+collectible2.name = "Collectible2";
+scene.add(collectible2);
+
+const collectible3 = collectibleObject.clone();
+collectible3.position.set(1, 0.8, -3);
+collectible3.name = "Collectible3";
+scene.add(collectible3);
+
+const collectible4 = collectibleObject.clone();
+collectible4.position.set(-3, 2, -6);
+collectible4.name = "Collectible4";
+scene.add(collectible4);
+
+const collectible5 = collectibleObject.clone();
+collectible5.position.set(4, 1.2, -10);
+collectible5.name = "Collectible5";
+scene.add(collectible5);
+
 
 let lookingAtObject = null;
 let lookStartTime = 0;
