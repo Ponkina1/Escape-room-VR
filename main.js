@@ -54,12 +54,10 @@ const collectedItems = [];
 const allCollectibles = [
   "CollectibleGeometry", 
   "SphereCollectible", 
-  "CubeCollectible",
-  // Agrega más objetos aquí si es necesario
+  "CubeCollectible"
 ];
 
-
-// Crear geometría básica (un dodecaedro) en lugar de la torre
+// Crear geometría básica (un dodecaedro)
 const geometry = new THREE.DodecahedronGeometry(0.5);
 const material = new THREE.MeshPhongMaterial({ 
   color: 0x00ff00,
@@ -70,7 +68,6 @@ const collectibleObject = new THREE.Mesh(geometry, material);
 collectibleObject.position.set(0, 2, -6);
 collectibleObject.name = "CollectibleGeometry";
 scene.add(collectibleObject);
-
 
 // Objeto 1: Esfera
 const sphereGeometry = new THREE.SphereGeometry(0.5);
@@ -88,20 +85,13 @@ cubeCollectible.position.set(3, 1.5, -8);
 cubeCollectible.name = "CubeCollectible";
 scene.add(cubeCollectible);
 
-
-
-////////////////////////////
-const doorGeometry  = new THREE.BoxGeometry( 3, 7, 1 ); 
-const doorMaterial  = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-const door = new THREE.Mesh( doorGeometry, doorMaterial ); 
-scene.add( door );
-door.name = "DoorCollectible"; 
-door.position.set(0,5,-8);
-
-
-
-
-///////////////////////////
+// Puerta
+const doorGeometry = new THREE.BoxGeometry(3, 7, 1);
+const doorMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+const door = new THREE.Mesh(doorGeometry, doorMaterial);
+door.name = "DoorCollectible";
+door.position.set(0, 5, -8);
+scene.add(door);
 
 let lookingAtObject = null;
 let lookStartTime = 0;
@@ -115,6 +105,23 @@ const progressBar = new THREE.Mesh(
 progressBar.rotation.x = -Math.PI / 2;
 progressBar.visible = false;
 scene.add(progressBar);
+
+// Función para verificar la condición de la puerta
+function checkDoorCondition() {
+  const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
+  const allCollected = requiredItems.every(item => collectedItems.includes(item));
+  if (allCollected) {
+    alert("¡Has ganado! Todos los objetos han sido recolectados.");
+    // Cambiar el color de la puerta cuando se han recolectado todos los objetos
+    const door = scene.getObjectByName("DoorCollectible");
+    if (door) {
+      door.material.color.setHex(0xff0000);
+    }
+  } else {
+    const missingItems = requiredItems.filter(item => !collectedItems.includes(item));
+    alert(`Aún necesitas recolectar los siguientes objetos: ${missingItems.join(", ")}`);
+  }
+}
 
 // Función para recoger objetos
 function pickUpObject(object) {
@@ -158,11 +165,10 @@ function setupVRControllers() {
       if (intersects.length > 0) {
         const pickedObject = intersects[0].object;
 
-        if (pickedObject.name === "CollectibleGeometry") {
-          window.alert("¡Objeto coleccionable detectado!");
+        if (allCollectibles.includes(pickedObject.name)) {
           pickUpObject(pickedObject);
           return;
-        } 
+        }
       }
 
       const offsetPosition = { x: -INTERSECTION.x, y: -INTERSECTION.y, z: -INTERSECTION.z, w: 1 };
@@ -194,9 +200,11 @@ function setupVRControllers() {
 document.addEventListener("keydown", (event) => {
   keyStates[event.code] = true;
 });
+
 document.addEventListener("keyup", (event) => {
   keyStates[event.code] = false;
 });
+
 window.addEventListener("resize", onWindowResize);
 
 function playerCollisions() {
@@ -288,21 +296,10 @@ function updateRaycaster() {
         progressBar.visible = false;
 
         if (detectedObject.name === "DoorCollectible") {
-        // Verificar si todos los objetos han sido recogidos
-        const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
-        const allCollected = requiredItems.every(item => collectedItems.includes(item));
-        if (allCollected) {
-          alert("¡Has ganado! Todos los objetos han sido recolectados.");
-        } 
-}
-
-        if (detectedObject.name === "CollectibleGeometry") {
+          checkDoorCondition();
+        } else if (allCollectibles.includes(detectedObject.name)) {
           pickUpObject(detectedObject);
-        } else if (detectedObject.name === "SphereCollectible") {
-          pickUpObject(detectedObject);
-   } else if (detectedObject.name === "CubeCollectible") {
-    pickUpObject(detectedObject);
-  }
+        }
         lookingAtObject = null;
       }
     }
