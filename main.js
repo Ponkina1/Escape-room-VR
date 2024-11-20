@@ -287,7 +287,7 @@ function updateRaycaster() {
       if (progress >= 1) {
         progressBar.visible = false;
 
-        if (detectedObject.name === "Door") {
+        if (detectedObject.name === "DoorCollectible") {
         // Verificar si todos los objetos han sido recogidos
         const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
         const allCollected = requiredItems.every(item => collectedItems.includes(item));
