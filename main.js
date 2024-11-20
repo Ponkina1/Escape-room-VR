@@ -255,14 +255,14 @@ scene.add(collectibleObject);
 const sphereGeometry = new THREE.SphereGeometry(0.5);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
 const sphereCollectible = new THREE.Mesh(sphereGeometry, sphereMaterial);
-sphereCollectible.position.set(-10, 4, 10);
+sphereCollectible.position.set(-10, 2, 10);
 sphereCollectible.name = "SphereCollectible";
 scene.add(sphereCollectible);
 
 const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff, shininess: 100 });
 const cubeCollectible = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cubeCollectible.position.set(9, 4, 10);
+cubeCollectible.position.set(9, 2, 10);
 cubeCollectible.name = "CubeCollectible";
 scene.add(cubeCollectible);
 
