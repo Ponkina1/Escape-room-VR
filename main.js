@@ -627,14 +627,14 @@ objLoader.load('Objs/Almacen.obj', (object) => {
 objLoader.load('Objs/cajas.obj', (object) => {
   applyTexturesToObject(object);  // Aplicar las texturas al objeto
   scene.add(object);             // Agregar a la escena
-  object.position.set(3, 0, -3);  // Posicionar en la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
 });
 
 // Cargar el objeto "Engranajes.obj"
 objLoader.load('Objs/Engranajes.obj', (object) => {
   scene.add(object);             // Agregar a la escena
-  object.position.set(-3, 0, -3);  // Posicionar en la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
 });
 
@@ -642,7 +642,7 @@ objLoader.load('Objs/Engranajes.obj', (object) => {
 objLoader.load('Objs/Mesa.obj', (object) => {
   applyTexturesToObject(object);  // Aplicar las texturas al objeto
   scene.add(object);             // Agregar a la escena
-  object.position.set(2, 0, 0);  // Posicionar en la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
 });
 
@@ -650,7 +650,7 @@ objLoader.load('Objs/Mesa.obj', (object) => {
 objLoader.load('Objs/posters.obj', (object) => {
   applyTexturesToObject(object);  // Aplicar las texturas al objeto
   scene.add(object);             // Agregar a la escena
-  object.position.set(0, 2, -5);  // Posicionar en la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
 });
 
@@ -658,7 +658,7 @@ objLoader.load('Objs/posters.obj', (object) => {
 objLoader.load('Objs/puzzle.obj', (object) => {
   applyTexturesToObject(object);  // Aplicar las texturas al objeto
   scene.add(object);             // Agregar a la escena
-  object.position.set(0, 1, -8);  // Posicionar en la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
   object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
 });
 
