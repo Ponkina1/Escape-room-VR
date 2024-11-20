@@ -61,8 +61,12 @@ function pickUpObject(object) {
   console.log("Recogido:", object.name);
   console.log("Objetos recogidos:", collectedItems);
 
-  // Remover el objeto de la escena
-  scene.remove(object);
+ // Remover el objeto de la escena
+ if (object.parent) {
+  object.parent.remove(object); // Eliminarlo desde su padre
+} else {
+  scene.remove(object); // Fallback en caso de que no tenga padre
+}
 }
 ///////////////////////////////////////////
 
@@ -215,16 +219,17 @@ function teleportInVR() {
     // Si hay una intersección válida, verificar si es un objeto recogible
     if (INTERSECTION) {
       // Detectar el objeto bajo el raycaster
-      const intersects = raycaster.intersectObjects(scene.children, true);
-      if (intersects.length > 0) {
-        const pickedObject = intersects[0].object;
-  
-        // Verificar si el objeto tiene un nombre válido para recoger
-        if (pickedObject.name && pickedObject.name.startsWith("Torre")) {
-          pickUpObject(pickedObject);
-          return; // No realizar teletransportación si recogemos un objeto
-        }
-      }
+ // Si hay una intersección válida, verificar si es un objeto recogible
+ const intersects = raycaster.intersectObjects(scene.children, true);
+ if (intersects.length > 0) {
+   const pickedObject = intersects[0].object;
+
+   // Verificar si el objeto tiene un nombre válido para recoger
+   if (pickedObject.name && pickedObject.name.startsWith("Torre")) {
+     pickUpObject(pickedObject);
+     return; // No realizar teletransportación si recogemos un objeto
+   }
+ }
   
       // Teletransportación
       playerCollider.start.copy(new THREE.Vector3(
@@ -270,11 +275,11 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 // Cargar el modelo OBJ
 const objLoader = new OBJLoader();
 objLoader.load('Torre.obj', (object) => {
-  object.name = "Torre";
   // Agregar el objeto cargado a la escena
   object.scale.set(0.8, 0.8, 0.8); 
   object.position.set(0, 2, -6);// Escalar el modelo si es necesario
   scene.add(object);
+  object.name = "Torre";
 },);
 ////////////////////////////////////////
 
