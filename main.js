@@ -652,7 +652,7 @@ function applyTexturesToObject(object) {
 
 // Cargar escenario base
 const loader = new FBXLoader();
-loader.load('Objs/EscenarioBase.fbx', (object) => {
+loader.load('Objs/Escenario.fbx', (object) => {
   scene.add(object);
   object.position.set(0, 0, 0);
   object.scale.set(0.4, 0.4, 0.4);
