@@ -226,9 +226,12 @@ function teleportInVR() {
 
    // Verificar si el objeto tiene un nombre válido para recoger
    if (pickedObject.name && pickedObject.name.startsWith("Torre")) {
+    window.alert("¡Torre detectada!");
      pickUpObject(pickedObject);
      return; // No realizar teletransportación si recogemos un objeto
-   }
+   } else {
+    window.alert("Objeto detectado no es la Torre: " + (pickedObject.name || "Sin nombre"));
+  }
  }
   
       // Teletransportación
