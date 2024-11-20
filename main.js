@@ -507,21 +507,84 @@ const textureLoader = new THREE.TextureLoader();
 // Cargar las texturas de Pared y Piso
 const paredTexture = textureLoader.load('Uv/Paredes.png');
 const pisoTexture = textureLoader.load('Uv/Piso.png');
+const almacenTexture = textureLoader.load('Uv/Almacen.png');
+const cajaTexture = textureLoader.load('Uv/Caja.png');
+const mesaTexture = textureLoader.load('Uv/Mesa.png');
+const poster1Texture = textureLoader.load('Uv/Poster1.png');
+const poster2Texture = textureLoader.load('Uv/Poster2.png');
+const poster3Texture = textureLoader.load('Uv/Poster3.png');
+const placaCodigoTexture = textureLoader.load('Uv/PlacaCodigo.png');
+const placaEngranajeTexture = textureLoader.load('Uv/PlacaEngranaje.png');
+const placaSalidaTexture = textureLoader.load('Uv/PlacaSalida.png');
 
 // Función para aplicar las texturas al escenario
 function applyTexturesToScene(scene) {
   scene.traverse((child) => {
     if (child.isMesh) {
       // Asignar la textura de la pared al mesh llamado 'pared'
-      if (child.name === 'pared') {
+      if (child.name === 'Pared') {
         child.material = new THREE.MeshBasicMaterial({
           map: paredTexture
         });
       }
       // Asignar la textura del piso al mesh llamado 'pisos'
-      if (child.name === 'pisos') {
+      if (child.name === 'Pisos') {
         child.material = new THREE.MeshBasicMaterial({
           map: pisoTexture
+        });
+      }
+    }
+  });
+}
+
+// Función para aplicar texturas a los meshes de un objeto
+function applyTexturesToObject(object) {
+  object.traverse((child) => {
+    if (child.isMesh) {
+      // Asignar las texturas a los meshes correspondientes
+      if (child.name === 'AlmacenArmario') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: almacenTexture
+        });
+      }
+      if (child.name === 'cajas') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: cajaTexture
+        });
+      }
+      if (child.name === 'Mesa') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: mesaTexture
+        });
+      }
+      if (child.name === 'Poster') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: poster1Texture
+        });
+      }
+      if (child.name === 'Poster2') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: poster2Texture
+        });
+      }
+      if (child.name === 'Poster3') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: poster3Texture
+        });
+      }
+      if (child.name === 'PanelAcertijo') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: placaCodigoTexture
+        });
+      }
+      if (child.name === 'PanelServicio') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: placaEngranajeTexture
+        });
+      }
+      if (child.name === 'PanelSalida') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: placaSalidaTexture
         });
       }
     }
@@ -543,7 +606,7 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
 
 // Cargar el modelo OBJ de la villana
 const objLoader = new OBJLoader();
-objLoader.load('Villana.obj', (object) => {
+objLoader.load('Objs/villana.obj', (object) => {
   // Agregar el objeto cargado (villana) a la escena
   scene.add(object);
   object.scale.set(0.4, 0.4, 0.4); // Escalar el modelo si es necesario
@@ -551,6 +614,54 @@ objLoader.load('Villana.obj', (object) => {
 }, undefined, (error) => {
   console.error('Error al cargar el modelo OBJ:', error);
 });
+
+// Cargar el objeto "Almacen.obj"
+objLoader.load('Objs/Almacen.obj', (object) => {
+  applyTexturesToObject(object);  // Aplicar las texturas al objeto
+  scene.add(object);             // Agregar a la escena
+  object.position.set(0, 0, 0);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
+// Cargar el objeto "cajas.obj"
+objLoader.load('Objs/cajas.obj', (object) => {
+  applyTexturesToObject(object);  // Aplicar las texturas al objeto
+  scene.add(object);             // Agregar a la escena
+  object.position.set(3, 0, -3);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
+// Cargar el objeto "Engranajes.obj"
+objLoader.load('Objs/Engranajes.obj', (object) => {
+  scene.add(object);             // Agregar a la escena
+  object.position.set(-3, 0, -3);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
+// Cargar el objeto "Mesa.obj"
+objLoader.load('Objs/Mesa.obj', (object) => {
+  applyTexturesToObject(object);  // Aplicar las texturas al objeto
+  scene.add(object);             // Agregar a la escena
+  object.position.set(2, 0, 0);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
+// Cargar el objeto "posters.obj"
+objLoader.load('Objs/posters.obj', (object) => {
+  applyTexturesToObject(object);  // Aplicar las texturas al objeto
+  scene.add(object);             // Agregar a la escena
+  object.position.set(0, 2, -5);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
+// Cargar el objeto "puzzle.obj"
+objLoader.load('Objs/puzzle.obj', (object) => {
+  applyTexturesToObject(object);  // Aplicar las texturas al objeto
+  scene.add(object);             // Agregar a la escena
+  object.position.set(0, 1, -8);  // Posicionar en la escena
+  object.scale.set(0.4, 0.4, 0.4);  // Escalar el objeto
+});
+
 
 setupVRControllers();
 
