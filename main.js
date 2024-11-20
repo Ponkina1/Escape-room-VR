@@ -267,8 +267,9 @@ cubeCollectible.name = "CubeCollectible";
 scene.add(cubeCollectible);
 
 // Puerta
+const doortexture = textureLoader.load('Uv/PuertaThreeJS.png');
 const doorGeometry = new THREE.BoxGeometry(4, 7, 1);
-const doorMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+const doorMaterial = new THREE.MeshPhongMaterial({ map: doortexture });
 const door = new THREE.Mesh(doorGeometry, doorMaterial);
 door.name = "DoorCollectible";
 door.position.set(-0.5, 4, -9);
