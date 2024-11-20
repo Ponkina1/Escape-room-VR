@@ -16,7 +16,7 @@ const villainSpeed = 0.1;
 // Escena
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x88ccee);
-scene.fog = new THREE.Fog("#FA612D", 1, 20);
+scene.fog = new THREE.Fog("#13678A", 1, 20);
 
 // Cámara
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
