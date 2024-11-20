@@ -5,6 +5,7 @@ import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFa
 import { Octree } from "three/addons/math/Octree.js";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
 const clock = new THREE.Clock();
 
@@ -245,6 +246,8 @@ loader.load('Objs/librito.fbx', (object) => {
   object.position.set(0, 0.5, -6);
   object.scale.set(0.4, 0.4, 0.4);
 
+  worldOctree.fromGraphNode(scene);
+
     // Cambiar el color del material a verde
     object.traverse((child) => {
       if (child.isMesh) {
@@ -252,6 +255,17 @@ loader.load('Objs/librito.fbx', (object) => {
       }
   });
 });
+
+////////////////////////////////
+// Cargar el modelo OBJ
+const objLoader = new OBJLoader();
+objLoader.load('Torre.obj', (object) => {
+  // Agregar el objeto cargado a la escena
+  scene.add(object);
+  object.scale.set(0.8, 0.8, 0.8); 
+  object.position.set(2, 2, 2);// Escalar el modelo si es necesario
+},);
+////////////////////////////////////////
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true});
