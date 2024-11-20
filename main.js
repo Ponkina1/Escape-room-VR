@@ -272,8 +272,8 @@ const objLoader = new OBJLoader();
 objLoader.load('Torre.obj', (object) => {
   object.name = "Torre";
   // Agregar el objeto cargado a la escena
-  object.scale.set(0, 0.8, -6); 
-  object.position.set(2, 2, 2);// Escalar el modelo si es necesario
+  object.scale.set(0.8, 0.8, 0.8); 
+  object.position.set(0, 2, -6);// Escalar el modelo si es necesario
   scene.add(object);
 },);
 ////////////////////////////////////////
