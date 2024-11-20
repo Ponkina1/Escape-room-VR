@@ -51,6 +51,14 @@ let playerOnFloor = false;
 const keyStates = {};
 const collectedItems = [];
 
+const allCollectibles = [
+  "CollectibleGeometry", 
+  "SphereCollectible", 
+  "CubeCollectible",
+  // Agrega más objetos aquí si es necesario
+];
+
+
 // Crear geometría básica (un dodecaedro) en lugar de la torre
 const geometry = new THREE.DodecahedronGeometry(0.5);
 const material = new THREE.MeshPhongMaterial({ 
@@ -79,6 +87,42 @@ const cubeCollectible = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cubeCollectible.position.set(3, 1.5, -8);
 cubeCollectible.name = "CubeCollectible";
 scene.add(cubeCollectible);
+
+
+
+////////////////////////////
+const geometry5 = new THREE.BoxGeometry( 3, 7, 1 ); 
+const material5 = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+const cube = new THREE.Mesh( geometry5, material5 ); 
+scene.add( cube );
+
+cube.position.set(0,5,-8);
+
+// Función para verificar si todos los objetos han sido recogidos
+function checkVictory() {
+  const allCollected = collectibleNames.every(name => collectedItems.includes(name));
+  if (allCollected) {
+    showVictoryMessage();
+  }
+}
+
+// Función para mostrar el mensaje de victoria
+function showVictoryMessage() {
+  const victoryMessage = document.createElement("div");
+  victoryMessage.style.position = "absolute";
+  victoryMessage.style.top = "50%";
+  victoryMessage.style.left = "50%";
+  victoryMessage.style.transform = "translate(-50%, -50%)";
+  victoryMessage.style.fontSize = "30px";
+  victoryMessage.style.color = "white";
+  victoryMessage.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+  victoryMessage.style.padding = "20px";
+  victoryMessage.style.borderRadius = "10px";
+  victoryMessage.innerText = "¡Victoria! Has recogido todos los objetos.";
+  document.body.appendChild(victoryMessage);
+}
+
+///////////////////////////
 
 let lookingAtObject = null;
 let lookStartTime = 0;
@@ -270,6 +314,8 @@ function updateRaycaster() {
    } else if (detectedObject.name === "CubeCollectible") {
     pickUpObject(detectedObject);
   }
+
+  checkVictory();
         lookingAtObject = null;
       }
     }
