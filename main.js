@@ -571,9 +571,44 @@ function applyTexturesToObject(object) {
           map: almacenTexture
         });
       }
-      if (child.name === 'cajas') {
+      if (child.name === 'AlmacenArmario1') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: almacenTexture
+        });
+      }
+      if (child.name === 'AlmacenArmario2') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: almacenTexture
+        });
+      }
+      if (child.name === 'AlmacenArmario3') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: almacenTexture
+        });
+      }
+      if (child.name === 'Caja') {
         child.material = new THREE.MeshBasicMaterial({
           map: cajaTexture
+        });
+      }
+      if (child.name === 'Caja2') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: cajaTexture
+        });
+      }
+      if (child.name === 'Caja3') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: cajaTexture
+        });
+      }
+      if (child.name === 'Caja4') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: cajaTexture
+        });
+      }
+      if (child.name === 'AlmacenArmario4') {
+        child.material = new THREE.MeshBasicMaterial({
+          map: almacenTexture
         });
       }
       if (child.name === 'Mesa') {
