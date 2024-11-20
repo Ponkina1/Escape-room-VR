@@ -91,36 +91,15 @@ scene.add(cubeCollectible);
 
 
 ////////////////////////////
-const geometry5 = new THREE.BoxGeometry( 3, 7, 1 ); 
-const material5 = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-const cube = new THREE.Mesh( geometry5, material5 ); 
-scene.add( cube );
+const doorGeometry  = new THREE.BoxGeometry( 3, 7, 1 ); 
+const doorMaterial  = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+const door = new THREE.Mesh( doorGeometry, doorMaterial ); 
+scene.add( door );
+door.name = "DoorCollectible"; 
+door.position.set(0,5,-8);
 
-cube.position.set(0,5,-8);
 
-// Función para verificar si todos los objetos han sido recogidos
-function checkVictory() {
-  const allCollected = collectibleNames.every(name => collectedItems.includes(name));
-  if (allCollected) {
-    showVictoryMessage();
-  }
-}
 
-// Función para mostrar el mensaje de victoria
-function showVictoryMessage() {
-  const victoryMessage = document.createElement("div");
-  victoryMessage.style.position = "absolute";
-  victoryMessage.style.top = "50%";
-  victoryMessage.style.left = "50%";
-  victoryMessage.style.transform = "translate(-50%, -50%)";
-  victoryMessage.style.fontSize = "30px";
-  victoryMessage.style.color = "white";
-  victoryMessage.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
-  victoryMessage.style.padding = "20px";
-  victoryMessage.style.borderRadius = "10px";
-  victoryMessage.innerText = "¡Victoria! Has recogido todos los objetos.";
-  document.body.appendChild(victoryMessage);
-}
 
 ///////////////////////////
 
@@ -307,6 +286,16 @@ function updateRaycaster() {
 
       if (progress >= 1) {
         progressBar.visible = false;
+
+        if (detectedObject.name === "Door") {
+        // Verificar si todos los objetos han sido recogidos
+        const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
+        const allCollected = requiredItems.every(item => collectedItems.includes(item));
+        if (allCollected) {
+          alert("¡Has ganado! Todos los objetos han sido recolectados.");
+        } 
+}
+
         if (detectedObject.name === "CollectibleGeometry") {
           pickUpObject(detectedObject);
         } else if (detectedObject.name === "SphereCollectible") {
@@ -314,8 +303,6 @@ function updateRaycaster() {
    } else if (detectedObject.name === "CubeCollectible") {
     pickUpObject(detectedObject);
   }
-
-  checkVictory();
         lookingAtObject = null;
       }
     }
