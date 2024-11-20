@@ -1,12 +1,17 @@
 import * as THREE from "three";
-
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { Octree } from "three/addons/math/Octree.js";
 import { Capsule } from "three/addons/math/Capsule.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
+// Variables globales del juego
 const clock = new THREE.Clock();
+let gameTimer = 90; // 90 segundos (1:30 minutos)
+let isGameOver = false;
+let villainModel = null;
+const villainSpeed = 0.1;
 
 // Escena
 const scene = new THREE.Scene();
@@ -17,7 +22,7 @@ scene.fog = new THREE.Fog("#FA612D", 1, 20);
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.6, 0);
 
-// Renderer with mobile optimizations
+// Renderer con optimizaciones móviles
 const renderer = new THREE.WebGLRenderer({ 
   antialias: false,
   powerPreference: "high-performance",
@@ -87,6 +92,31 @@ class VRMessageSystem {
     this.counterText = new THREE.Mesh(counterGeometry, counterTextMaterial);
     this.counterPanel.add(this.counterText);
 
+    // Panel del temporizador
+    const timerGeometry = new THREE.PlaneGeometry(0.6, 0.2);
+    const timerMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.7,
+      side: THREE.DoubleSide
+    });
+    this.timerPanel = new THREE.Mesh(timerGeometry, timerMaterial);
+    this.timerPanel.position.set(1.5, 1.5, -2);
+    scene.add(this.timerPanel);
+
+    // Texto del temporizador
+    const timerCanvas = document.createElement('canvas');
+    timerCanvas.width = 256;
+    timerCanvas.height = 64;
+    this.timerTexture = new THREE.CanvasTexture(timerCanvas);
+    const timerTextMaterial = new THREE.MeshBasicMaterial({
+      map: this.timerTexture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    this.timerText = new THREE.Mesh(timerGeometry, timerTextMaterial);
+    this.timerPanel.add(this.timerText);
+
     this.camera = camera;
     this.updateCounter(0, 3);
   }
@@ -100,7 +130,6 @@ class VRMessageSystem {
     this.messageContext.fillText(message, 256, 64);
     this.messageTexture.needsUpdate = true;
 
-    // Posicionar frente a la cámara
     const cameraDirection = new THREE.Vector3();
     this.camera.getWorldDirection(cameraDirection);
     this.messagePanel.position.copy(this.camera.position).add(cameraDirection.multiplyScalar(-2));
@@ -123,18 +152,40 @@ class VRMessageSystem {
     this.counterTexture.needsUpdate = true;
   }
 
+  updateTimer(timeLeft) {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = Math.floor(timeLeft % 60);
+    const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    const ctx = this.timerTexture.image.getContext('2d');
+    ctx.clearRect(0, 0, 256, 64);
+    ctx.fillStyle = timeLeft <= 10 ? 'red' : 'white';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(timeString, 128, 32);
+    this.timerTexture.needsUpdate = true;
+  }
+
   update() {
-    // Actualizar posición del contador
     const cameraDirection = new THREE.Vector3();
     this.camera.getWorldDirection(cameraDirection);
+    
+    // Actualizar posición del contador
     this.counterPanel.position.copy(this.camera.position);
     this.counterPanel.position.y += 0.3;
     this.counterPanel.position.x -= 0.5;
     this.counterPanel.lookAt(this.camera.position);
+
+    // Actualizar posición del temporizador
+    this.timerPanel.position.copy(this.camera.position);
+    this.timerPanel.position.y += 0.3;
+    this.timerPanel.position.x += 0.5;
+    this.timerPanel.lookAt(this.camera.position);
   }
 }
 
-// Optimized lighting for mobile
+// Iluminación optimizada para móviles
 const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
@@ -165,7 +216,7 @@ const allCollectibles = [
 // Crear sistema de mensajes
 const messageSystem = new VRMessageSystem(scene, camera);
 
-// Crear geometría básica (un dodecaedro)
+// Crear objetos coleccionables
 const geometry = new THREE.DodecahedronGeometry(0.5);
 const material = new THREE.MeshPhongMaterial({ 
   color: 0x00ff00,
@@ -177,7 +228,6 @@ collectibleObject.position.set(0, 2, -6);
 collectibleObject.name = "CollectibleGeometry";
 scene.add(collectibleObject);
 
-// Objeto 1: Esfera
 const sphereGeometry = new THREE.SphereGeometry(0.5);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
 const sphereCollectible = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -185,7 +235,6 @@ sphereCollectible.position.set(-2, 1, -4);
 sphereCollectible.name = "SphereCollectible";
 scene.add(sphereCollectible);
 
-// Objeto 2: Cubo
 const cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
 const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff, shininess: 100 });
 const cubeCollectible = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -201,11 +250,12 @@ door.name = "DoorCollectible";
 door.position.set(0, 5, -8);
 scene.add(door);
 
+// Variables para el sistema de mirada
 let lookingAtObject = null;
 let lookStartTime = 0;
 const lookDuration = 2000;
 
-// Indicador visual (barra de progreso)
+// Barra de progreso
 const progressBar = new THREE.Mesh(
   new THREE.PlaneGeometry(0.2, 0.02),
   new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
@@ -214,7 +264,19 @@ progressBar.rotation.x = -Math.PI / 2;
 progressBar.visible = false;
 scene.add(progressBar);
 
-// Función para verificar la condición de la puerta
+// Funciones del juego
+function endGame(won = false) {
+  isGameOver = true;
+  if (won) {
+    messageSystem.showMessage("¡Has ganado! ¡Escapaste a tiempo!");
+  } else {
+    messageSystem.showMessage("¡Game Over! ¡La villana te atrapó!");
+  }
+  setTimeout(() => {
+    location.reload();
+  }, 3000);
+}
+
 function checkDoorCondition() {
   const requiredItems = ["CollectibleGeometry", "SphereCollectible", "CubeCollectible"];
   const allCollected = requiredItems.every(item => collectedItems.includes(item));
@@ -224,14 +286,30 @@ function checkDoorCondition() {
     if (door) {
       door.material.color.setHex(0xff0000);
     }
-    alert("¡Has ganado! Todos los objetos han sido recolectados.");
+    endGame(true);
   } else {
     const missing = requiredItems.filter(item => !collectedItems.includes(item)).length;
     messageSystem.showMessage(`Te faltan ${missing} objetos por recolectar`);
   }
 }
 
-// Función para recoger objetos
+function updateVillain() {
+  if (!villainModel || !isGameOver) return;
+  
+  const villainPos = villainModel.position;
+  const playerPos = camera.position;
+  const direction = new THREE.Vector3()
+    .subVectors(playerPos, villainPos)
+    .normalize();
+  
+  villainModel.position.add(direction.multiplyScalar(villainSpeed));
+  villainModel.lookAt(playerPos);
+  
+  if (villainPos.distanceTo(playerPos) < 1) {
+    endGame(false);
+  }
+}
+
 function pickUpObject(object) {
   collectedItems.push(object.name);
   messageSystem.showMessage(`¡Objeto recolectado!`);
@@ -259,7 +337,6 @@ let INTERSECTION;
 const tempMatrix = new THREE.Matrix4();
 const raycaster = new THREE.Raycaster();
 
-// Configurar controladores VR
 function setupVRControllers() {
   function onSelectStart() {
     this.userData.isSelecting = true;
@@ -430,6 +507,17 @@ loader.load('Objs/EscenarioBase.fbx', (object) => {
   object.position.set(0, 0, 0);
   object.scale.set(0.4, 0.4, 0.4);
   worldOctree.fromGraphNode(scene);
+});
+
+// Cargar el modelo OBJ de la villana
+const objLoader = new OBJLoader();
+objLoader.load('Villana.obj', (object) => {
+  // Agregar el objeto cargado (villana) a la escena
+  scene.add(object);
+  object.scale.set(0.4, 0.4, 0.4); // Escalar el modelo si es necesario
+  object.position.set(0, 0, 0); // Posición del modelo en la escena
+}, undefined, (error) => {
+  console.error('Error al cargar el modelo OBJ:', error);
 });
 
 setupVRControllers();
