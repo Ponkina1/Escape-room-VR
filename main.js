@@ -53,6 +53,20 @@ const keyStates = {};
 const collectedItems = [];
 
 
+///////////////////////////////////////////
+let lookingAtObject = null; // Objeto que se está mirando actualmente
+let lookStartTime = 0; // Tiempo cuando se empezó a mirar
+const lookDuration = 2000; // Tiempo requerido para interactuar (en milisegundos)
+
+// Indicador visual (barra de progreso)
+const progressBar = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.2, 0.02),
+  new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
+);
+progressBar.rotation.x = -Math.PI / 2; // Alinearlo horizontalmente
+progressBar.visible = false;
+scene.add(progressBar);
+
 ////////////////////////////////////////////
 // Función para recoger objetos
 function pickUpObject(object) {
@@ -257,6 +271,48 @@ function teleportInVR() {
     }
   }
   ////////////////////////////////////////////////////////
+  function updateRaycaster() {
+    const controller = controller1; // Usaremos el controlador 1 para la dirección del raycaster
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  
+    // Detectar intersecciones
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+      const detectedObject = intersects[0].object;
+  
+      // Si está mirando un nuevo objeto
+      if (lookingAtObject !== detectedObject) {
+        lookingAtObject = detectedObject;
+        lookStartTime = performance.now(); // Reiniciar el temporizador
+  
+        // Activar indicador visual
+        progressBar.visible = true;
+        progressBar.position.copy(detectedObject.position).add(new THREE.Vector3(0, 1, 0)); // Mostrar sobre el objeto
+      } else {
+        // Actualizar progreso del indicador
+        const elapsedTime = performance.now() - lookStartTime;
+        const progress = Math.min(elapsedTime / lookDuration, 1); // Limitar a 1 (100%)
+        progressBar.scale.x = progress;
+  
+        if (progress >= 1) {
+          // Tiempo suficiente mirando el objeto
+          progressBar.visible = false; // Ocultar barra de progreso
+          if (detectedObject.name === "Torre") {
+            pickUpObject(detectedObject); // Recoger el objeto
+          }
+          lookingAtObject = null; // Reiniciar la detección
+        }
+      }
+    } else {
+      // Si no está mirando ningún objeto
+      lookingAtObject = null;
+      progressBar.visible = false; // Ocultar barra de progreso
+    }
+  }
+  
+  //////////////////////////////////////////////////////////
 
 // Redimensionar ventana
 function onWindowResize() {
@@ -294,6 +350,7 @@ function animate() {
   const deltaTime = Math.min(0.05, clock.getDelta()) / STEPS_PER_FRAME;
   
   teleportInVR(); // Llamar a teleportación antes de actualizar jugador
+  updateRaycaster();
   
   for (let i = 0; i < STEPS_PER_FRAME; i++) {
     updatePlayer(deltaTime);
